@@ -12,13 +12,6 @@
                 "children":
                 [
                     {
-                        "command": "csv_set_first_row_as_header",
-                        "caption": "Use First Row As Header"
-                    },
-                    {
-                        "caption": "-"
-                    },
-                    {
                         "command": "csv_sort_asc_current_col",
                         "caption": "Sort Current Column (Ascending)"
                     },
@@ -38,8 +31,8 @@
                         "caption": "-"
                     },
                     {
-                        "command": "csv_format",
-                        "caption": "Format"
+                        "command": "csv_format_compact",
+                        "caption": "Format (Compacted)"
                     }
                 ]
             }

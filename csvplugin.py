@@ -7,154 +7,120 @@ import threading
 import os
 import json
 
-delimiters = [',', ';']
-
 class SortDirection:
-    Ascending=1
-    Descending=2
+    Ascending = 1
+    Descending = 2
 
 class CSVMatrix:
-    delimiter = ''
-    rows = []
-    header = []
-    use_header = False
-
-    def __init__(self, view):
-        self.use_header = GetFileSetting(view, 'use_header')
-        self.delimiter = ''
+    def __init__(self):
         self.rows = []
-        self.header = []
+        self.num_columns = 0
+        self.valid = False
+        self.delimiter = ','
 
     def AddRow(self, row):
-        if self.use_header == True and len(self.header) == 0:
-            self.header = row
-        else:
-            self.rows.append(row)
+        self.rows.append(row)
 
-    def SortColumn(self, column, sortdirection):
+    def Finalize(self):
+        if not len(self.rows):
+            return
+
+        self.num_columns = 0
+        for row in self.rows:
+            if len(row) > self.num_columns:
+                self.num_columns = len(row)
+
+        self.valid = True
+
+    def SortByColumn(self, column_index, sortdirection):
         if sortdirection == SortDirection.Ascending:
-            self.rows.sort(key=lambda row: row[column])
+            self.rows.sort(key=lambda row: row[column_index])
         else:
-            self.rows.sort(key=lambda row: row[column], reverse=True)
+            self.rows.sort(key=lambda row: row[column_index], reverse=True)
 
-    def GetHeader(self):
-        if self.use_header:
-            return self.header
-        else:
-            return self.rows[0]
+    def FormatCompact(self, trailing_delimiters):
+        output = ''
 
+        for row in self.rows:
+            for column_index in range(self.num_columns):
+                if column_index < len(row):
+                    column = row[column_index]
 
-# not done through regex for clarity and control
-# not done using csv module to have better control over what happens with the quotes
-def GetColumnValues(row, delimiter, trimwhitespaces):
-    columns = []
-    currentword = ''
-    insidequotes = False
-    quotescharacter = ''
-    waitingfordelimiter = False
-    for char in row:
-        skip = False
+                    if column.find(self.delimiter) != -1 or column.find('"') != -1:
+                        output += '"'
+                        output += column.replace('"', '""')
+                        output += '"'
 
-        # ignore any leading whitespace
-        if trimwhitespaces and len(currentword) == 0:
-            if string.whitespace.find(char):
-                # skip it
-                skip = True
+                    else:
+                        output += column
 
-        # ignore any whitespace after the closing bracket
-        if trimwhitespaces and waitingfordelimiter:
-            if string.whitespace.find(char):
-            # skip it
-                skip = True
+                if column_index < len(row) - 1 or trailing_delimiters:
+                    output += self.delimiter
 
-        # look for the closing quote
-        if skip == False and insidequotes:
-            if char == quotescharacter:
-                waitingfordelimiter = True
-                insidequotes = False
-                quotescharacter = ''
-                #skip = True
-
-        # look for ending quote
-        if skip == False and len(currentword) == 0 and (char == '"' or char == '\''):
-            insidequotes = True
-            quotescharacter = char
-            #skip = True
-
-        if skip == False and char == delimiter:
-            if not insidequotes:
-                skip = True
-                if trimwhitespaces:
-                    currentword = currentword.strip()
-                columns.append(currentword)
-                currentword = ''
-                waitingfordelimiter = False
-
-        if skip == False:
-            currentword += char
-
-    # add the last word
-    if trimwhitespaces:
-        currentword = currentword.strip()
-    columns.append(currentword)
-
-    return 1, columns
-
-def ValidateBuffer(view):
-    # read line by line
-    sample = view.substr(sublime.Region(0, view.size()))
-    matrix = None
-    numcolumns = False
-    valid = True
-    for currentdelimiter in delimiters:
-        matrix = CSVMatrix(view)
-        matrix.delimiter = currentdelimiter
-        valid = True
-        numcolumns = False
-        for line in sample.split("\n"):
-            success, listvalues = GetColumnValues(line, currentdelimiter, 0)
-
-            # validate the number of columns
-            if numcolumns == False:
-                numcolumns = len(listvalues)
-            else:
-                if numcolumns != len(listvalues):
-                    valid = False
-                    break
-
-            # build the matrix
-            matrix.AddRow(listvalues)
-
-        if valid:
-            break
-
-    if valid:
-        return True, matrix    
-    else:
-        return False, None
-
-def BuildViewFromMatrix(matrix):
-    numcolumns = len(matrix.rows[0])
-    numrows = len(matrix.rows)
-    output = ''
-
-    if matrix.header:
-        for columnindex, column in enumerate(matrix.header):
-            output += column
-            if columnindex < (numcolumns - 1):
-                output += matrix.delimiter
-        output += '\n'
-
-    for rowindex, row in enumerate(matrix.rows):
-        for columnindex, column in enumerate(row):
-            output += column
-            if columnindex < (numcolumns - 1):
-                output += matrix.delimiter
-        if rowindex < (numrows - 1):
             output += '\n'
-    return output
 
-def GetColumnFromCursor(view):
+        return output
+
+    # not done through regex for clarity and control
+    # not done using csv module to have better control over what happens with the quotes
+    def ParseRow(self, row, trim_whitespace):
+        columns = []
+        currentword = ''
+        insidequotes = False
+        pending_double_quote = False
+
+        for char in row:
+            if insidequotes:
+                if char == '"':
+                    if pending_double_quote:
+                        currentword += '"'
+                    insidequotes = False
+
+                else:
+                    currentword += char
+                    pending_double_quote = False
+
+            else:
+                if char == '"':
+                    insidequotes = True
+                    pending_double_quote = True
+
+                elif char == self.delimiter:
+                    if trim_whitespace:
+                        currentword = currentword.strip()
+                    columns.append(currentword)
+                    currentword = ''
+                    continue
+
+                else:
+                    currentword += char
+
+        # add the last word
+        if trim_whitespace:
+            currentword = currentword.strip()
+        columns.append(currentword)
+
+        return columns
+
+    def FromText(text):
+        matrix = CSVMatrix()
+
+        for line in text.split("\n"):
+            if len(line.strip()):
+                row = matrix.ParseRow(line, True)
+
+                matrix.AddRow(row)
+
+        matrix.Finalize()
+
+        return matrix
+
+    def FromView(view):
+        text = view.substr(sublime.Region(0, view.size()))
+
+        return CSVMatrix.FromText(text)
+
+def GetColumnIndexFromCursor(view):
     selection = view.sel()[0]
     # find which column we're working on
     wordrange = view.word(selection)
@@ -163,143 +129,90 @@ def GetColumnFromCursor(view):
     linebegin = min(linerange.a, linerange.b)
     leadingtowordregion = sublime.Region(linebegin, wordbegin)
     leadingtoword = view.substr(leadingtowordregion)
-    column = leadingtoword.count(',')
-    return column
-
-def SortView(view, matrix, column, direction):
-    matrix.SortColumn(column, direction)
-
-    output = BuildViewFromMatrix(matrix)
-
-    view.run_command('csv_set_output', {'output': output});
-    
-class CsvSortAscCurrentColCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        valid, matrix = ValidateBuffer(self.view)
-        if not valid:
-            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
-            return
-
-        column = GetColumnFromCursor(self.view)
-
-        SortView(self.view, matrix, column, SortDirection.Ascending)
-
-class CsvSortDescCurrentColCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        valid, matrix = ValidateBuffer(self.view)
-        if not valid:
-            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
-            return
-
-        column = GetColumnFromCursor(self.view)
-
-        SortView(self.view, matrix, column, SortDirection.Descending)
-
-class CsvSortAscPromptColCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        valid, self.matrix = ValidateBuffer(self.window.active_view())
-        if not valid:
-            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
-            return
-
-        self.window.show_quick_panel(self.matrix.GetHeader(), self.on_select_done)
-
-    def on_select_done(self, picked):
-        if picked >= 0:
-            SortView(self.window.active_view(), self.matrix, picked, SortDirection.Ascending)
-
-class CsvSortDescPromptColCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        valid, self.matrix = ValidateBuffer(self.window.active_view())
-        if not valid:
-            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
-            return
-
-        self.window.show_quick_panel(self.matrix.GetHeader(), self.on_select_done)
-
-    def on_select_done(self, picked):
-        if picked >= 0:
-            SortView(self.window.active_view(), self.matrix, picked, SortDirection.Descending)
+    column_index = leadingtoword.count(',')
+    return column_index
 
 class CsvSetOutputCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         if(args['output'] != None):
             self.view.replace(edit, sublime.Region(0, self.view.size()), args['output']);
 
-class CsvFormatCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        valid, self.matrix = ValidateBuffer(self.window.active_view())
-        if not valid:
+class CsvSortAscCurrentColCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        matrix = CSVMatrix.FromView(self.view)
+        if not matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        self.window.show_input_panel('Format (Values as 0 based column between {})', "",
-            self.on_done, self.on_change, self.on_cancel)
+        column_index = GetColumnIndexFromCursor(self.view)
 
-    def on_done(self, input):
-        use_header = GetFileSetting(self.window.active_view(), 'use_header')
+        matrix.SortByColumn(column_index, SortDirection.Ascending)
+
+        output = matrix.FormatCompact(False)
+        self.view.replace(edit, sublime.Region(0, self.view.size()), output);
+
+class CsvSortDescCurrentColCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        matrix = CSVMatrix.FromView(self.view)
+        if not matrix.valid:
+            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
+            return
+
+        column_index = GetColumnIndexFromCursor(self.view)
+
+        matrix.SortByColumn(column_index, SortDirection.Descending)
         
-        output = ''
-        numrows = len(self.matrix.rows)
-        for rowindex, row in enumerate(self.matrix.rows):
-            formatted_row = input
-            for columnindex, column in enumerate(row):
-                formatted_row = formatted_row.replace('{' + str(columnindex) + '}', column)
-                
-            output += formatted_row
-            if rowindex < (numrows - 1):
-                output += '\n'
+        output = matrix.FormatCompact(False)
+        self.view.replace(edit, sublime.Region(0, self.view.size()), output);
 
-        view = self.window.new_file()
-        view.set_name('Formatted Output')
-        view.set_scratch(True)
+class CsvSortAscPromptColCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        self.view = self.window.active_view()
+        self.matrix = CSVMatrix.FromView(self.view)
+        if not self.matrix.valid:
+            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
+            return
+
+        self.window.show_quick_panel(self.matrix.rows[0], self.on_select_done)
+
+    def on_select_done(self, picked):
+        if picked >= 0:
+            column_index = picked
+
+            self.matrix.SortByColumn(column_index, SortDirection.Ascending)
+            
+            output = self.matrix.FormatCompact(False)
+
+            self.view.run_command('csv_set_output', {'output': output});
+
+class CsvSortDescPromptColCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        self.view = self.window.active_view()
+        self.matrix = CSVMatrix.FromView(self.view)
+        if not self.matrix.valid:
+            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
+            return
+
+        self.window.show_quick_panel(self.matrix.rows[0], self.on_select_done)
+
+    def on_select_done(self, picked):
+        if picked >= 0:
+            column_index = picked
+
+            self.matrix.SortByColumn(column_index, SortDirection.Descending)
+           
+            output = self.matrix.FormatCompact(False)
+
+            self.view.run_command('csv_set_output', {'output': output});
+
+class CsvFormatCompactCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        view = self.window.active_view()
+        matrix = CSVMatrix.FromView(view)
+        if not matrix.valid:
+            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
+            return
+
+        output = matrix.FormatCompact(False)
 
         view.run_command('csv_set_output', {'output': output});
-
-    def on_change(self, input):
-        pass
-
-    def on_cancel(self):
-        pass
-
-def SetFileSetting(view, key, value):
-    filename = view.file_name()
-    settings = sublime.load_settings(__name__ + '.sublime-settings')
-
-    filesettings = settings.get('csv_per_file_setting', [])
-
-    foundsetting = False
-
-    for filesetting in filesettings:
-        if filesetting['file'] == filename:
-            foundsetting = True
-            filesetting[key] = value
-            break
-
-    if not foundsetting:
-        filesetting = {}
-        filesetting['file'] = filename
-        filesetting[key] = value
-        filesettings.append(filesetting)
-
-    settings.set('csv_per_file_setting', filesettings)
-    sublime.save_settings(__name__ + '.sublime-settings')
-
-def GetFileSetting(view, key):
-    filename = view.file_name()
-    settings = sublime.load_settings(__name__ + '.sublime-settings')
-
-    filesettings = settings.get('csv_per_file_setting', [])
-
-    foundsetting = False
-
-    for filesetting in filesettings:
-        if filesetting['file'] == filename:
-            return filesetting[key]
-
-    if not foundsetting:
-        return False
-
-class CsvSetFirstRowAsHeaderCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        SetFileSetting(self.view, "use_header", True)

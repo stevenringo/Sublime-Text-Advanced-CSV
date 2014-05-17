@@ -1,9 +1,5 @@
 [
     {
-        "command": "csv_set_first_row_as_header",
-        "caption": "CSV: Use First Row As Header"
-    },
-    {
         "command": "csv_sort_asc_current_col",
         "caption": "CSV: Sort Current Column (Ascending)"
     },
@@ -20,7 +16,7 @@
         "caption": "CSV: Sort Column (Descending)"
     },
     {
-        "command": "csv_format",
-        "caption": "CSV: Format"
+        "command": "csv_format_compact",
+        "caption": "CSV: Format (Compacted)"
     }
 ]
