@@ -12,27 +12,30 @@
                 "children":
                 [
                     {
-                        "command": "csv_sort_asc_current_col",
-                        "caption": "Sort Current Column (Ascending)"
-                    },
-                    {
-                        "command": "csv_sort_desc_current_col",
-                        "caption": "Sort Current Column (Descending)"
-                    },
-                    {
-                        "command": "csv_sort_asc_prompt_col",
-                        "caption": "Sort Column (Ascending)"
-                    },
-                    {
-                        "command": "csv_sort_desc_prompt_col",
-                        "caption": "Sort Column (Descending)"
+                        "command": "csv_sort_by_col",
+                        "caption": "Sort by column"
                     },
                     {
                         "caption": "-"
                     },
                     {
+                        "command": "csv_insert_col",
+                        "caption": "Insert column"
+                    },
+                    {
+                        "command": "csv_delete_col",
+                        "caption": "Delete column"
+                    },
+                    {
+                        "caption": "-"
+                    },
+                    {
+                        "command": "csv_format_expand",
+                        "caption": "Justify columns"
+                    },
+                    {
                         "command": "csv_format_compact",
-                        "caption": "Format (Compacted)"
+                        "caption": "Compact columns"
                     }
                 ]
             }

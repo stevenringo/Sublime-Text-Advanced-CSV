@@ -1,22 +1,22 @@
 [
     {
-        "command": "csv_sort_asc_current_col",
-        "caption": "CSV: Sort Current Column (Ascending)"
+        "command": "csv_sort_by_col",
+        "caption": "CSV: Sort by column"
     },
     {
-        "command": "csv_sort_desc_current_col",
-        "caption": "CSV: Sort Current Column (Descending)"
+        "command": "csv_insert_col",
+        "caption": "CSV: Insert column"
     },
     {
-        "command": "csv_sort_asc_prompt_col",
-        "caption": "CSV: Sort Column (Ascending)"
+        "command": "csv_delete_col",
+        "caption": "CSV: Delete column"
     },
     {
-        "command": "csv_sort_desc_prompt_col",
-        "caption": "CSV: Sort Column (Descending)"
+        "command": "csv_format_expand",
+        "caption": "CSV: Justify columns"
     },
     {
         "command": "csv_format_compact",
-        "caption": "CSV: Format (Compacted)"
+        "caption": "CSV: Compact columns"
     }
 ]
