@@ -192,11 +192,19 @@ class CSVMatrix:
         first_char_index = 0
         insidequotes = False
 
-        for char_index, char in enumerate(row):
-            if char == '"':
-                if char_index < len(row) - 1 and row[char_index + 1] == '"':
-                    currentword += '"'
-                    continue
+        char_index = 0
+        while char_index < len(row):
+            char = row[char_index]
+
+            if char_index < len(row) - 1:
+                next_char = row[char_index + 1]
+            else:
+                next_char = None
+
+            if char == '"' and next_char == '"':
+                currentword += '"'
+                char_index += 2
+                continue
 
             if insidequotes:
                 if char == '"':
@@ -215,6 +223,8 @@ class CSVMatrix:
 
                 else:
                     currentword += char
+
+            char_index += 1
 
         columns.append(CSVValue(currentword, first_char_index=first_char_index))
 
