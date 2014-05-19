@@ -93,6 +93,17 @@ class CSVMatrix:
             if column_index < len(row):
                 row.pop(column_index)
 
+    def DeleteTrailingColumns(self, column_index):
+        for row in self.rows:
+            last_column_index = 0
+            
+            for column_index, value in enumerate(row):
+                if len(value.text.strip()) > 0:
+                    last_column_index = column_index
+
+            first_empty_column_index = last_column_index + 1
+            del row[first_empty_column_index:]
+
     def QuoteText(self, text):
         if self.delimiter in text or '"' in text:
             return '"' + text.replace('"', '""') + '"'
@@ -299,6 +310,21 @@ class CsvDeleteColCommand(sublime_plugin.TextCommand):
         column_index = GetColumnIndexFromCursor(self.view)
 
         matrix.DeleteColumn(column_index)
+
+        output = matrix.Format()
+
+        self.view.replace(edit, sublime.Region(0, self.view.size()), output);
+
+class CsvDeleteTrailingColsCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        matrix = CSVMatrix.FromView(self.view)
+        if not matrix.valid:
+            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
+            return
+
+        column_index = GetColumnIndexFromCursor(self.view)
+
+        matrix.DeleteTrailingColumns(column_index)
 
         output = matrix.Format()
 

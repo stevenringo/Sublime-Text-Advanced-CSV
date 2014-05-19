@@ -29,6 +29,10 @@
             {
                 "command": "csv_format_compact",
                 "caption": "Compact columns"
+            },
+            {
+                "command": "csv_delete_trailing_cols",
+                "caption": "Delete empty trailing columns"
             }
         ]
     }
