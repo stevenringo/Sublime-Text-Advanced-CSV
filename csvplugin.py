@@ -2,7 +2,11 @@
 # Improved by Wade Brainerd (wadetb@gmail.com / www.wadeb.com)
 
 # TODO
-# + GetColumnIndexFromCursor doesn't handle quotes etc.
+# + GetColumnIndexFromCursor doesn't handle quotes etc.  
+#   Use view.rowcol() to get row & column, then enumerate the row.  
+#   When parsing the row, store char_index in the CSVValue.  
+#   To get the column index, find the first value in the row whose char_index > column, 
+#   and choose the previous.
 # + Restore selection after operation.
 
 import sublime
@@ -13,8 +17,9 @@ class SortDirection:
     Descending = 2
 
 class CSVValue:
-    def __init__(self, text):
+    def __init__(self, text, first_char_index = 0):
         self.text = text
+        self.first_char_index = first_char_index
 
     def AsFloat(self):
         try:
@@ -171,7 +176,9 @@ class CSVMatrix:
     # not done using csv module to have better control over what happens with the quotes
     def ParseRow(self, row):
         columns = []
+
         currentword = ''
+        first_char_index = 0
         insidequotes = False
 
         for char_index, char in enumerate(row):
@@ -191,13 +198,14 @@ class CSVMatrix:
                     insidequotes = True
 
                 elif char == self.delimiter:
-                    columns.append(CSVValue(currentword))
+                    columns.append(CSVValue(currentword, first_char_index=first_char_index))
                     currentword = ''
+                    first_char_index = 0
 
                 else:
                     currentword += char
 
-        columns.append(CSVValue(currentword))
+        columns.append(CSVValue(currentword, first_char_index=first_char_index))
 
         return columns
 
