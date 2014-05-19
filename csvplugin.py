@@ -10,6 +10,8 @@
 # + Restore selection after operation.
 # + Add default key bindings, like https://github.com/edankwan/Exec-Parser-Sublime-Plugin, 
 # + Use numpy to evaluate "=" cells, if installed, same link as above. 
+# + Command to move a column to another index.
+# + Command to block select a column- would enable many mass edit features.
 
 import sublime
 import sublime_plugin
