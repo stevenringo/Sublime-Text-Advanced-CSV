@@ -2,11 +2,6 @@
 # Improved by Wade Brainerd (wadetb@gmail.com / www.wadeb.com)
 
 # TODO
-# + GetColumnIndexFromCursor doesn't handle quotes etc.  
-#   Use view.rowcol() to get row & column, then enumerate the row.  
-#   When parsing the row, store char_index in the CSVValue.  
-#   To get the column index, find the first value in the row whose char_index > column, 
-#   and choose the previous.
 # + Restore selection after operation.
 # + Add default key bindings, like https://github.com/edankwan/Exec-Parser-Sublime-Plugin, 
 # + Use numpy to evaluate "=" cells, if installed, same link as above. 
@@ -21,7 +16,7 @@ class SortDirection:
     Descending = 2
 
 class CSVValue:
-    def __init__(self, text, first_char_index = 0):
+    def __init__(self, text, first_char_index=0):
         self.text = text
         self.first_char_index = first_char_index
 
@@ -221,9 +216,9 @@ class CSVMatrix:
                     insidequotes = True
 
                 elif char == self.delimiter:
-                    columns.append(CSVValue(currentword, first_char_index=first_char_index))
+                    columns.append(CSVValue(currentword, first_char_index))
                     currentword = ''
-                    first_char_index = 0
+                    first_char_index = char_index
 
                 else:
                     currentword += char
@@ -252,17 +247,19 @@ class CSVMatrix:
 
         return CSVMatrix.FromText(text)
 
-def GetColumnIndexFromCursor(view):
-    selection = view.sel()[0]
-    # find which column we're working on
-    wordrange = view.word(selection)
-    linerange = view.line(selection)
-    wordbegin = min(wordrange.a, wordrange.b)
-    linebegin = min(linerange.a, linerange.b)
-    leadingtowordregion = sublime.Region(linebegin, wordbegin)
-    leadingtoword = view.substr(leadingtowordregion)
-    column_index = leadingtoword.count(',')
-    return column_index
+    def GetColumnIndexFromCursor(self, view):
+        selection = view.sel()[0]
+
+        row_index, col_index = view.rowcol(selection.begin())
+
+        row = self.rows[row_index]
+
+        for column_index, value in enumerate(row):
+            print(value.first_char_index)
+            if value.first_char_index > col_index:
+                return column_index - 1
+
+        return len(row) - 1
 
 class CsvSetOutputCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
@@ -278,7 +275,7 @@ class CsvSortByColCommand(sublime_plugin.WindowCommand):
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        self.column_index = GetColumnIndexFromCursor(self.view)
+        self.column_index = matrix.GetColumnIndexFromCursor(self.view)
 
         self.window.show_quick_panel(['Ascending', 'Descending'], self.on_select_direction_done)
 
@@ -306,7 +303,7 @@ class CsvInsertColCommand(sublime_plugin.TextCommand):
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        column_index = GetColumnIndexFromCursor(self.view)
+        column_index = matrix.GetColumnIndexFromCursor(self.view)
 
         matrix.InsertColumn(column_index)
 
@@ -321,7 +318,7 @@ class CsvDeleteColCommand(sublime_plugin.TextCommand):
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        column_index = GetColumnIndexFromCursor(self.view)
+        column_index = matrix.GetColumnIndexFromCursor(self.view)
 
         matrix.DeleteColumn(column_index)
 
@@ -336,7 +333,7 @@ class CsvDeleteTrailingColsCommand(sublime_plugin.TextCommand):
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        column_index = GetColumnIndexFromCursor(self.view)
+        column_index = matrix.GetColumnIndexFromCursor(self.view)
 
         matrix.DeleteTrailingColumns(column_index)
 
