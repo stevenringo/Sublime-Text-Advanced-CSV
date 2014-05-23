@@ -2,7 +2,6 @@
 # Improved by Wade Brainerd (wadetb@gmail.com / www.wadeb.com)
 
 # TODO
-# + Add default key bindings, like https://github.com/edankwan/Exec-Parser-Sublime-Plugin, 
 # + Use numpy to evaluate "=" cells, if installed, same link as above. 
 
 import sublime
@@ -429,7 +428,7 @@ class CsvFormatCompactCommand(sublime_plugin.WindowCommand):
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        saved_selection = matrix.SaveSelection(self.view)
+        saved_selection = matrix.SaveSelection(view)
 
         output = matrix.FormatCompacted()
 
@@ -444,7 +443,7 @@ class CsvFormatExpandCommand(sublime_plugin.WindowCommand):
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        saved_selection = matrix.SaveSelection(self.view)
+        saved_selection = matrix.SaveSelection(view)
 
         output = matrix.FormatExpanded()
 
