@@ -5,8 +5,12 @@
         "children":
         [
             {
-                "command": "csv_sort_by_col",
-                "caption": "Sort by column"
+                "command": "csv_sort_by_col_asc",
+                "caption": "Sort by column (Ascending)"
+            },
+            {
+                "command": "csv_sort_by_col_desc",
+                "caption": "Sort by column (Descending)"
             },
             {
                 "caption": "-"
@@ -18,6 +22,10 @@
             {
                 "command": "csv_delete_col",
                 "caption": "Delete column"
+            },
+            {
+                "command": "csv_select_col",
+                "caption": "Select column"
             },
             {
                 "caption": "-"

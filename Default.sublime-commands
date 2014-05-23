@@ -1,7 +1,11 @@
 [
     {
-        "command": "csv_sort_by_col",
-        "caption": "CSV: Sort by column"
+        "command": "csv_sort_by_col_asc",
+        "caption": "CSV: Sort by column (Ascending)"
+    },
+    {
+        "command": "csv_sort_by_col_desc",
+        "caption": "CSV: Sort by column (Descending)"
     },
     {
         "command": "csv_insert_col",
@@ -10,6 +14,10 @@
     {
         "command": "csv_delete_col",
         "caption": "CSV: Delete column"
+    },
+    {
+        "command": "csv_select_col",
+        "caption": "CSV: Select column"
     },
     {
         "command": "csv_format_expand",
