@@ -21,14 +21,14 @@ The files can be obtained on github:
 ## Key bindings
 
 Key                 | Action
-------------------- | ----------------
-`Ctrl+Comma, Up`    | Sort ascending
-`Ctrl+Comma, Down`  | Sort descending
+------------------- | ---------------------------
+`Ctrl+Comma, Up`    | Sort by column (Ascending)
+`Ctrl+Comma, Down`  | Sort by column (Descending)
 `Ctrl+Comma, i`     | Insert column
 `Ctrl+Comma, d`     | Delete column
 `Ctrl+Comma, s`     | Select column
 `Ctrl+Comma, Space` | Justify columns
-`Ctrl+Comma, Comma` | Content Cell
+`Ctrl+Comma, Comma` | Collapse columns
 
 # License
 
