@@ -4,7 +4,7 @@ A plugin to manage CSV files, forked from Eric Martel's Sublime-Text-2-CSV-Plugi
 
 It's often easiest to work with CSV data when the columns are properly lined up.  This plugin provides a command to line up all the columns using spaces (`Justify columns`) and to collapse them back again (`Collapse columns`).
 
-It also includes commands to insert and delete columns and to sort data by column, with or without a header row, and respecting numeric order and lexigraphical order as appropriate.  
+It also includes commands to insert and delete columns and to sort data by column, with or without a header row, and respecting numeric order and lexicographical order as appropriate.  
 
 An entire column may be block selected (`Select column`), which enables complex operations like quickly reordering, merging, adding & deleting multiple columns.
 
