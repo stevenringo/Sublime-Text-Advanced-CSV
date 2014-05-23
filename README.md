@@ -2,13 +2,15 @@
 
 A plugin to manage CSV files, forked from Eric Martel's Sublime-Text-2-CSV-Plugin at ericmartel/Sublime-Text-2-CSV-Plugin.
 
-It's often easiest to work with CSV data when the columns are properly lined up.  This plugin provides a command to line up all the columns using spaces ('Justify columns') and to collapse them back again ('Collapse columns').
+It's often easiest to work with CSV data when the columns are properly lined up.  This plugin provides a command to line up all the columns using spaces (`Justify columns`) and to collapse them back again (`Collapse columns`).
 
-It also includes features to insert and delete columns and to sort data by column, with or without a header row, and respecting numeric order and lexigraphical order as appropriate.  All cells in a column may be block selected, allowing 
+It also includes features to insert and delete columns and to sort data by column, with or without a header row, and respecting numeric order and lexigraphical order as appropriate.  
+
+An entire column may be block selected (`Select column`), which enables complex operations like quickly reordering, merging, adding & deleting multiple columns.
 
 The plugin includes a feature to clean up empty trailing commas from rows, which are often left when opening a CSV file in Excel.
 
-These features work in both justified and collapsed modes.
+All the above features work in both justified and collapsed modes.
 
 Finally, the plugin has full support for RFC 4180 quoting.
 
