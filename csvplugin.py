@@ -1,11 +1,19 @@
 # Originally written by Eric Martel (emartel@gmail.com / www.ericmartel.com)
 # Improved by Wade Brainerd (wadetb@gmail.com / www.wadeb.com)
 
-# TODO
-# + Use numpy to evaluate "=" cells, if installed, same link as above. 
-
 import sublime
 import sublime_plugin
+
+import re
+
+try:
+    import numpy
+    have_numpy = True
+except ImportError:
+    print("=== NumPy disabled ===")
+    print("To enable cell evaluation, download NumPy from https://pypi.python.org/pypi/numpy")
+    print("and install it into your Sublime Text Packages directory.")
+    have_numpy = False
 
 class SortDirection:
     Ascending = 1
@@ -296,6 +304,71 @@ class CSVMatrix:
         else:
             return 0
 
+    def Evaluate(self):
+        if not have_numpy:
+            print("Cannot evaluate without NumPy.")
+            return
+
+        dimensions = (len(self.rows), self.num_columns)
+
+        m = numpy.zeros(dimensions)
+
+        for row_index, row in enumerate(self.rows):
+            for column_index, value in enumerate(row):
+                is_float, float_value = value.AsFloat()
+                if is_float:
+                    m[row_index,column_index] = float_value
+
+        for row_index, row in enumerate(self.rows):
+            for column_index, value in enumerate(row):
+                if value.text.startswith('='):
+                    try:
+                        if value.text.startswith('=^'):
+                            target_row_index = row_index - 1
+                            target_column_index = column_index
+                            expression = value.text[2:]
+
+                        elif value.text.startswith('=v'):
+                            target_row_index = row_index + 1
+                            target_column_index = column_index
+                            expression = value.text[2:]
+
+                        elif value.text.startswith('=<'):
+                            target_row_index = row_index
+                            target_column_index = column_index - 1
+                            expression = value.text[2:]
+
+                        elif value.text.startswith('=>'):
+                            target_row_index = row_index
+                            target_column_index = column_index + 1
+                            expression = value.text[2:]
+
+                        else:
+                            coordinate_match = re.match('=\((\d+),(\d+)\)', value.text)
+                            if coordinate_match:
+                                target_row_index = int(coordinate_match.group(1))
+                                target_column_index = int(coordinate_match.group(2))
+                                expression = value.text[len(coordinate_match.group(0)):]
+
+                            else:
+                                target_row_index = row_index
+                                target_column_index = column_index
+                                expression = value.text[1:]
+
+                        try:
+                            result = eval(str(expression), None, locals())
+                        except Exception as e:
+                            result = str(e)
+
+                        try:
+                            target_value = self.rows[target_row_index][target_column_index]
+                            target_value.text = str(result).ljust(len(target_value.text))
+                        except IndexError:
+                            print("Invalid expression target cell [{0}, {1}].".format(target_row_index, target_column_index));
+
+                    except:
+                        print("Invalid expression at cell [{0}, {1}].".format(row_index, column_index))
+
 class CsvSetOutputCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         if(args['output'] != None):
@@ -448,3 +521,20 @@ class CsvFormatExpandCommand(sublime_plugin.WindowCommand):
         output = matrix.FormatExpanded()
 
         view.run_command('csv_set_output', {'output': output, 'saved_selection': saved_selection})
+
+class CsvEvaluateCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        matrix = CSVMatrix.FromView(self.view)
+        if not matrix.valid:
+            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
+            return
+
+        saved_selection = matrix.SaveSelection(self.view)
+
+        matrix.Evaluate()
+
+        output = matrix.Format()
+
+        self.view.replace(edit, sublime.Region(0, self.view.size()), output);
+
+        matrix.RestoreSelection(self.view, saved_selection)

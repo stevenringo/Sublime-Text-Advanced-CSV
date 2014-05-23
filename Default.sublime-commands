@@ -30,5 +30,9 @@
     {
         "command": "csv_delete_trailing_cols",
         "caption": "CSV: Delete empty trailing columns"
+    },
+    {
+        "command": "csv_evaluate",
+        "caption": "CSV: Evaluate cells"
     }
 ]

@@ -1,9 +1,8 @@
-CSV by Eric Martel (emartel@gmail.com / www.ericmartel.com)
+CSV by Wade Brainerd (wadetb@gmail.com / www.wadeb.com)
+Forked from CSV by Eric Martel (emartel@gmail.com / www.ericmartel.com)
 
-Thank you for installing CSV. All commands are available through menus, context menus and the command palette.
+Thank you for installing CSV. All commands are available through keyboard shortcuts, menus, context menus and the command palette.
 
-Please direct any feedback to emartel@gmail.com or through github at https://github.com/ericmartel/Sublime-Text-2-CSV-Plugin.
+To enable cell evaluation, download NumPy from https://pypi.python.org/pypi/numpy, and install it into your Sublime Text Packages directory.
 
-Thank you for your support.
-
-Eric Martel
+Please direct any feedback to wadetb@gmail.com or through github at https://github.com/wadetb/Sublime-Text-3-CSV-Plugin.
