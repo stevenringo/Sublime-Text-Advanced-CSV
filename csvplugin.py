@@ -6,6 +6,11 @@ import sublime_plugin
 
 import re
 
+# TODO
+# + My expression syntax doesn't match NumPy, they uses exclusive "end" values when start:end is present.
+# + Relative ranges on NumPy expressions don't seem to be working right.
+# + Remove prints
+
 try:
     import numpy
     have_numpy = True
@@ -13,6 +18,7 @@ except ImportError:
     print("=== NumPy disabled ===")
     print("To enable cell evaluation, download NumPy from https://pypi.python.org/pypi/numpy")
     print("and install it into your Sublime Text Packages directory.")
+    print("======================")
     have_numpy = False
 
 class SortDirection:
@@ -304,6 +310,122 @@ class CSVMatrix:
         else:
             return 0
 
+    COORDINATE_RE_STR = r'''
+        \[
+            (?P<row_begin_mod>[+-])?
+            (?P<row_begin>\d+)?
+            (?P<row_delim>:)?
+            (?P<row_end_mod>[+-])?
+            (?P<row_end>\d+)?
+            (?P<comma>,)?
+            (?P<column_begin_mod>[+-])?
+            (?P<column_begin>\d+)?
+            (?P<column_delim>:)?
+            (?P<column_end_mod>[+-])?
+            (?P<column_end>\d+)?            
+        \]
+        '''
+
+    DIRECTION_RE_STR = r'''
+        (?P<direction>[<>v^])
+        '''
+
+    COORDINATE_RE = re.compile(COORDINATE_RE_STR, re.DEBUG|re.VERBOSE)
+    DIRECTION_RE = re.compile(DIRECTION_RE_STR, re.VERBOSE)
+    EXPRESSION_RE = re.compile('('+COORDINATE_RE_STR+')?('+DIRECTION_RE_STR+')?=', re.VERBOSE)
+
+    def ApplyModifier(self, value, mod, base_value):
+        if mod == '+':
+            return base_value + value
+        elif mod == '-':
+            return base_value - value
+        else:
+            return value
+    
+    def GetCoordinateRange(self, begin_mod, begin, delim, end_mod, end, base_value):
+        if delim:
+            if begin is None:
+                begin = 0
+            else:
+                begin = self.ApplyModifier(int(begin), begin_mod, base_value)
+            if end is None:
+                end = len(self.rows)
+            else:
+                end = self.ApplyModifier(int(end), end_mod, base_value) + 1
+        else:
+            if begin is None:
+                begin = base_value
+                end = base_value + 1
+            else:
+                begin = self.ApplyModifier(int(begin), begin_mod, base_value)
+                end = begin + 1
+
+        return (begin, end)
+
+    def GetRowColumnCoordinateRange(self, coordinate_match, base_row_index, base_column_index):
+        row_begin_mod = coordinate_match.group('row_begin_mod')
+        row_begin = coordinate_match.group('row_begin')
+        row_delim = coordinate_match.group('row_delim')
+        row_end_mod = coordinate_match.group('row_end_mod')
+        row_end = coordinate_match.group('row_end')
+
+        row_range = self.GetCoordinateRange(row_begin_mod, row_begin, row_delim, row_end_mod, row_end, base_row_index)
+
+        column_begin_mod = coordinate_match.group('column_begin_mod')
+        column_begin = coordinate_match.group('column_begin')
+        column_delim = coordinate_match.group('column_delim')
+        column_end_mod = coordinate_match.group('column_end_mod')
+        column_end = coordinate_match.group('column_end')
+
+        column_range = self.GetCoordinateRange(column_begin_mod, column_begin, column_delim, column_end_mod, column_end, base_column_index) 
+
+        return (row_range[0], row_range[1], column_range[0], column_range[1])
+
+    def ApplyDirectionOffsetToRange(self, direction_match, coord_range):
+        direction = direction_match.group('direction')
+
+        if direction == '^':
+            return (coord_range[0] - 1, coord_range[1] - 1, coord_range[2], coord_range[3])
+        elif direction == 'v':
+            return (coord_range[0] + 1, coord_range[1] + 1, coord_range[2], coord_range[3])
+        elif direction == '<':
+            return (coord_range[0], coord_range[1], coord_range[2] - 1, coord_range[3] - 1)
+        elif direction == '>':
+            return (coord_range[0], coord_range[1], coord_range[2] + 1, coord_range[3] + 1)
+        else:
+            return coord_range
+
+    def EvaluateExpressionCell(self, m, row_index, column_index, value, expression_match):
+        target_range = self.GetRowColumnCoordinateRange(expression_match, row_index, column_index)
+
+        target_range = self.ApplyDirectionOffsetToRange(expression_match, target_range)
+
+        expression = value.text[len(expression_match.group(0)):]
+
+        for target_row_index in range(target_range[0], target_range[1]):
+            for target_column_index in range(target_range[2], target_range[3]): 
+                sub_expression = expression[:]
+
+                for sub_match in CSVMatrix.COORDINATE_RE.finditer(expression):
+                    sub_range = self.GetRowColumnCoordinateRange(sub_match, target_row_index, target_column_index)
+                    print("SUB MATCH:",sub_match.group(0), sub_range)
+                    sub_range_text = "[{0}:{1},{2}:{3}]".format(sub_range[0], sub_range[1], sub_range[2], sub_range[3])
+                    sub_expression = sub_expression[:sub_match.start(0)] + sub_range_text + sub_expression[sub_match.end(0):] 
+
+                print("SUB_EXPRESSION:", sub_expression)
+
+                try:
+                    result = eval(str(sub_expression), None, locals())
+                except Exception as e:
+                    result = str(e)
+
+                try:
+                    print(target_row_index, target_column_index, result)
+                    target_value = self.rows[target_row_index][target_column_index]
+                    target_value.text = str(result).ljust(len(target_value.text))
+                except IndexError:
+                    print("Invalid expression target cell [{0}, {1}].".format(target_row_index, target_column_index));
+
     def Evaluate(self):
         if not have_numpy:
             print("Cannot evaluate without NumPy.")
@@ -321,53 +443,9 @@ class CSVMatrix:
 
         for row_index, row in enumerate(self.rows):
             for column_index, value in enumerate(row):
-                if value.text.startswith('='):
-                    try:
-                        if value.text.startswith('=^'):
-                            target_row_index = row_index - 1
-                            target_column_index = column_index
-                            expression = value.text[2:]
-
-                        elif value.text.startswith('=v'):
-                            target_row_index = row_index + 1
-                            target_column_index = column_index
-                            expression = value.text[2:]
-
-                        elif value.text.startswith('=<'):
-                            target_row_index = row_index
-                            target_column_index = column_index - 1
-                            expression = value.text[2:]
-
-                        elif value.text.startswith('=>'):
-                            target_row_index = row_index
-                            target_column_index = column_index + 1
-                            expression = value.text[2:]
-
-                        else:
-                            coordinate_match = re.match('=\((\d+),(\d+)\)', value.text)
-                            if coordinate_match:
-                                target_row_index = int(coordinate_match.group(1))
-                                target_column_index = int(coordinate_match.group(2))
-                                expression = value.text[len(coordinate_match.group(0)):]
-
-                            else:
-                                target_row_index = row_index
-                                target_column_index = column_index
-                                expression = value.text[1:]
-
-                        try:
-                            result = eval(str(expression), None, locals())
-                        except Exception as e:
-                            result = str(e)
-
-                        try:
-                            target_value = self.rows[target_row_index][target_column_index]
-                            target_value.text = str(result).ljust(len(target_value.text))
-                        except IndexError:
-                            print("Invalid expression target cell [{0}, {1}].".format(target_row_index, target_column_index));
-
-                    except:
-                        print("Invalid expression at cell [{0}, {1}].".format(row_index, column_index))
+                expression_match = CSVMatrix.EXPRESSION_RE.match(value.text)
+                if expression_match:
+                    self.EvaluateExpressionCell(m, row_index, column_index, value, expression_match)
 
 class CsvSetOutputCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
