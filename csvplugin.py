@@ -6,20 +6,13 @@ import sublime_plugin
 
 import re
 
-# TODO
-# + My expression syntax doesn't match NumPy, they uses exclusive "end" values when start:end is present.
-# + Relative ranges on NumPy expressions don't seem to be working right.
-# + Remove prints
-
 try:
     import numpy
-    have_numpy = True
 except ImportError:
     print("=== NumPy disabled ===")
     print("To enable cell evaluation, download NumPy from https://pypi.python.org/pypi/numpy")
     print("and install it into your Sublime Text Packages directory.")
     print("======================")
-    have_numpy = False
 
 class SortDirection:
     Ascending = 1
@@ -171,7 +164,7 @@ class CSVMatrix:
     def Format(self):
         output = ''
 
-        for row in self.rows:
+        for row_index, row in enumerate(self.rows):
             row_text = ''
 
             for column_index, value in enumerate(row):
@@ -182,14 +175,17 @@ class CSVMatrix:
                 if column_index < len(row) - 1:
                     row_text += self.delimiter
 
-            output += row_text + '\n'
+            output += row_text
+
+            if row_index < len(self.rows) - 1:
+                output += '\n'
 
         return output
 
     def FormatCompacted(self):
         output = ''
 
-        for row in self.rows:
+        for row_index, row in enumerate(self.rows):
             row_text = ''
 
             for column_index, value in enumerate(row):
@@ -200,7 +196,10 @@ class CSVMatrix:
                 if column_index < len(row) - 1:
                     row_text += self.delimiter
 
-            output += row_text + '\n'
+            output += row_text
+
+            if row_index < len(self.rows) - 1:
+                output += '\n'
 
         return output
 
@@ -209,7 +208,7 @@ class CSVMatrix:
 
         output = ''
 
-        for row in self.rows:
+        for row_index, row in enumerate(self.rows):
             row_text = ''
 
             for column_index, value in enumerate(row):
@@ -224,12 +223,13 @@ class CSVMatrix:
                 if column_index < len(row) - 1:
                     row_text += self.delimiter
 
-            output += row_text + '\n'
+            output += row_text
+
+            if row_index < len(self.rows) - 1:
+                output += '\n'
 
         return output
 
-    # not done through regex for clarity and control
-    # not done using csv module to have better control over what happens with the quotes
     def ParseRow(self, row):
         columns = []
 
@@ -279,10 +279,9 @@ class CSVMatrix:
         matrix = CSVMatrix()
 
         for line in text.split("\n"):
-            if len(line.strip()):
-                row = matrix.ParseRow(line)
+            row = matrix.ParseRow(line)
 
-                matrix.AddRow(row)
+            matrix.AddRow(row)
 
         matrix.Finalize()
 
@@ -351,7 +350,7 @@ class CSVMatrix:
             if end is None:
                 end = len(self.rows)
             else:
-                end = self.ApplyModifier(int(end), end_mod, base_value) + 1
+                end = self.ApplyModifier(int(end), end_mod, base_value)
         else:
             if begin is None:
                 begin = base_value
@@ -404,30 +403,25 @@ class CSVMatrix:
 
         for target_row_index in range(target_range[0], target_range[1]):
             for target_column_index in range(target_range[2], target_range[3]): 
-                sub_expression = expression[:]
-
-                for sub_match in CSVMatrix.COORDINATE_RE.finditer(expression):
-                    sub_range = self.GetRowColumnCoordinateRange(sub_match, target_row_index, target_column_index)
-                    print("SUB MATCH:",sub_match.group(0), sub_range)
-                    sub_range_text = "[{0}:{1},{2}:{3}]".format(sub_range[0], sub_range[1], sub_range[2], sub_range[3])
-                    sub_expression = sub_expression[:sub_match.start(0)] + sub_range_text + sub_expression[sub_match.end(0):] 
-
-                print("SUB_EXPRESSION:", sub_expression)
-
                 try:
-                    result = eval(str(sub_expression), None, locals())
+                    l = {}
+                    l['m'] = m
+                    l['row'] = target_row_index
+                    l['col'] = target_column_index
+                    l['frow'] = row_index
+                    l['fcol'] = column_index
+                    result = eval(str(expression), None, l)
                 except Exception as e:
                     result = str(e)
 
                 try:
-                    print(target_row_index, target_column_index, result)
                     target_value = self.rows[target_row_index][target_column_index]
                     target_value.text = str(result).ljust(len(target_value.text))
                 except IndexError:
                     print("Invalid expression target cell [{0}, {1}].".format(target_row_index, target_column_index));
 
     def Evaluate(self):
-        if not have_numpy:
+        if not numpy:
             print("Cannot evaluate without NumPy.")
             return
 
