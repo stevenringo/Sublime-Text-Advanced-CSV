@@ -309,8 +309,8 @@ class CSVMatrix:
         else:
             return 0
 
-    COORDINATE_RE_STR = r'''
-        \[
+    EXPRESSION_RE = re.compile(r'''
+        (\[
             (?P<row_begin_mod>[+-])?
             (?P<row_begin>\d+)?
             (?P<row_delim>:)?
@@ -322,16 +322,10 @@ class CSVMatrix:
             (?P<column_delim>:)?
             (?P<column_end_mod>[+-])?
             (?P<column_end>\d+)?            
-        \]
-        '''
-
-    DIRECTION_RE_STR = r'''
-        (?P<direction>[<>v^])
-        '''
-
-    COORDINATE_RE = re.compile(COORDINATE_RE_STR, re.DEBUG|re.VERBOSE)
-    DIRECTION_RE = re.compile(DIRECTION_RE_STR, re.VERBOSE)
-    EXPRESSION_RE = re.compile('('+COORDINATE_RE_STR+')?('+DIRECTION_RE_STR+')?=', re.VERBOSE)
+        \])?
+        (?P<direction>[<>v^])?
+        =
+        ''', re.VERBOSE)
 
     def ApplyModifier(self, value, mod, base_value):
         if mod == '+':
