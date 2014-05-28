@@ -148,18 +148,16 @@ class CSVMatrix:
         else:
             return text
 
-    def GetColumnWidths(self):
-        column_widths = [0] * self.num_columns
+    def MeasureColumns(self):
+        self.column_widths = [0] * self.num_columns
 
         for row in self.rows:
             for column_index, value in enumerate(row):
                 text = self.QuoteText(value.text)
                 width = len(text)
 
-                if width > column_widths[column_index]:
-                    column_widths[column_index] = width
-
-        return column_widths
+                if width > self.column_widths[column_index]:
+                    self.column_widths[column_index] = width
 
     def Format(self):
         output = ''
@@ -204,7 +202,7 @@ class CSVMatrix:
         return output
 
     def FormatExpanded(self):
-        column_widths = self.GetColumnWidths()
+        self.MeasureColumns()
 
         output = ''
 
@@ -214,7 +212,7 @@ class CSVMatrix:
             for column_index, value in enumerate(row):
                 quoted_text = self.QuoteText(value.text)
 
-                column_width = column_widths[column_index]
+                column_width = self.column_widths[column_index]
 
                 quoted_padded_text = quoted_text.ljust(column_width)
 
@@ -395,6 +393,12 @@ class CSVMatrix:
 
         expression = value.text[len(expression_match.group(0)):]
 
+        # Expand sheet for target range.
+        while target_range[1] >= len(self.rows):
+            self.rows.append([])
+        while target_range[3] >= len(self.column_widths):
+            self.column_widths.append(0)
+
         for target_row_index in range(target_range[0], target_range[1]):
             for target_column_index in range(target_range[2], target_range[3]): 
                 try:
@@ -405,12 +409,19 @@ class CSVMatrix:
                     l['frow'] = row_index
                     l['fcol'] = column_index
                     result = eval(str(expression), None, l)
+
                 except Exception as e:
                     result = str(e)
 
                 try:
+                    row = self.rows[target_row_index]
+
+                    while target_column_index >= len(row):
+                        row.append(CSVValue(''.ljust(self.column_widths[len(row)])))
+
                     target_value = self.rows[target_row_index][target_column_index]
                     target_value.text = str(result).ljust(len(target_value.text))
+
                 except IndexError:
                     print("Invalid expression target cell [{0}, {1}].".format(target_row_index, target_column_index));
 
@@ -418,6 +429,8 @@ class CSVMatrix:
         if not numpy:
             print("Cannot evaluate without NumPy.")
             return
+
+        self.MeasureColumns()
 
         dimensions = (len(self.rows), self.num_columns)
 
