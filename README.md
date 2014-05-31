@@ -43,15 +43,15 @@ To trigger cell evaluation, the contents of a cell must follow a standard patter
 
 `range` defines the set of cells whose contents will be updated, and `python expression` defines the Python expression that will be evaluated.
 
-### Range syntax
+### Ranges
 
 If `range` is left blank, the formula cell itself is replaced.  Unlike Excel, the formula text is not stored separately from the displayed value, so this has the effect of destroying the formula, though the evaluate command can always be undone if that result is unwanted.
 
-	=<python expression> - Replaces the current cell with the result of `python expression`.
+- `=<python expression>` Replaces the current cell with the result of `python expression`.
 
 The syntax for defining a range other than the formula cell is:
 
-	[<row_start>:<row_end>,<col_start>:<col_end>]=<python expression>
+`[<row_start>:<row_end>,<col_start>:<col_end>]=<python expression>`
 
 Updates a rectangular area of the document from `row_start` to `row_end` and from `col_start` to `col_end`.  If `row_start` or `col_start` is omitted, the range starts at the first row or column of the document.  
 
@@ -59,28 +59,39 @@ If `row_end` or `col_end` is omitted, the range ends at the last row or column o
 
 Here are all the variations of this syntax:
 
-	[:] - Updates all cells in the current column.
-	[<row_start>:<row_end>] - Updates cells in the current column from row_start to row_end.
-	[<row_start>:] - Updates cells in the current column from row_start to the end of the document.
-	[:<row_end>] - Updates cells in the current column from the beginning of the document to row_end.
-	[,:] - Updates all cells in the current row.
-	[,<col_start>:<col_end>] - Updates all cells in the current row from col_start to col_end.
-	[,<col_start>:] - Updates all cells in the current row from col_start to the end of the document.
-	[,:<col_end>] - Updates all cells in the current row from the beginning of the document to col_end.
-	[:,:] - Updates all cells in the document.
-	[:,<col_start>:<col_end>] - Updates cells in all rows from col_start to col_end.
-	[:,<col_start>:] - Updates cells in all rows from col_start to the end of the document.
-	[:,:<col_end>] - Updates cells in all rows from the beginning of the document to col_end.
+- `[:]` Updates all cells in the current column.
+- `[<row_start>:<row_end>]` Updates cells in the current column from `row_start` to `row_end`.
+- `[<row_start>:]` Updates cells in the current column from `row_start` to the end of the document.
+- `[:<row_end>]` Updates cells in the current column from the beginning of the document to `row_end`.
+- `[,:]` Updates all cells in the current row.
+- `[,<col_start>:<col_end>]` Updates all cells in the current row from `col_start` to `col_end`.
+- `[,<col_start>:]` Updates all cells in the current row from `col_start` to the end of the document.
+- `[,:<col_end>]` Updates all cells in the current row from the beginning of the document to `col_end`.
+- `[:,:]` Updates all cells in the document.
+- `[:,<col_start>:<col_end>]` Updates cells in all rows from `col_start` to `col_end`.
+- `[:,<col_start>:]` Updates cells in all rows from `col_start` to the end of the document.
+- `[:,:<col_end>]` Updates cells in all rows from the beginning of the document `to col_end`.
 
 When defining ranges, the `start` cell is updated, but the `end` cell is not.  This is intentional, to match NumPy array slice syntax.
 
-	[0:1] - Updates all cells in row 0.
-	[1:3] - Updates all cells in rows 1 and 2.
+- `[0:1]` Updates all cells in row 0.
+- `[1:3]` Updates all cells in rows 1 and 2.
 
 Row and column numbers in ranges may be prefixed with `+` or `-`, which makes them relative to the formula's location in the document.
 
-	[:,-1] - Updates all cells in the column immediately to the left of the formula.
-	[:,+1:+3] - Updates all cells in the two columns immediate to the right of the formula .
+- `[:,-1]` Updates all cells in the column immediately to the left of the formula.
+- `[:,+1:+3]` Updates all cells in the two columns immediate to the right of the formula .
+
+For convenience, the range may be shifted one cell in any direction by prefixing the `=` character with a direction modifier.
+
+- `<=` Updates the cell to the left of the formula.
+- `>=` Updates the cell to the right of the formula.
+- `^=` Updates the cell above the formula.
+- `v=` Updates the cell below the formula.
+
+The range shift modifier may be used in conjunction with numeric ranges.
+
+- `[:]<=` Updates all cells in the column to the left of the formula.
 
 ### Expression syntax
 
@@ -88,13 +99,49 @@ The Python expression is evaluated by Sublime Text's Python interpreter, for eac
 
 Some variables are provided to the evaluator:
 
-	m - A NumPy `ndarray` representing the document.  Non-numeric cells are represented with 0.  The array dimensions are padded to the maximum extents of the document, missing cells are filled in with 0.
-	row - The row of the cell being evaluated.
-	col - The column of the cell being evaluated.
-	frow - The row of the formula.
-	fcol - The column of the formula.
+- `m` A NumPy `ndarray` representing the document.  Non-numeric cells are represented with 0.  The array dimensions are padded to the maximum extents of the document, missing cells are filled in with 0.  For a NumPy tutorial, see http://wiki.scipy.org/Tentative_NumPy_Tutorial.
+- `row` The row of the cell being evaluated.
+- `col` The column of the cell being evaluated.
+- `frow` The row of the formula.
+- `fcol` The column of the formula.
 
 ## Examples
+
+### Example 1
+
+This example applies a simple column sum using the NumPy `sum` method.
+
+	item  ,price
+	shoes ,12
+	hat   ,2
+	pants ,8
+	shirt ,7.50
+	total ,      ,"<=m[1:5,1].sum()"
+
+### Example 2
+
+This example fills in totals by price and by item.
+
+	item  ,price ,qty ,total
+	shoes ,12    ,2   ,
+	hat   ,2     ,1   ,
+	pants ,8     ,1   ,
+	shirt ,7.50  ,2   ,
+	total ,      ,    ,
+	"[5,1:4]=m[1:5,col].sum()"
+	"[1:5,3]=m[row,1]*m[row,2]"
+
+Note that it must be evaluated (`Ctrl+Comma, Equals`) twice to calculate the last cell.
+
+### Installation
+
+To use formulas, you must install the Python NumPy package into your Sublime Text Packages directory.
+
+1. Visit https://pypi.python.org/pypi/numpy and download the Python 3.3 `*.whl` file for your system.  
+2. Rename the `.whl` file with a `.zip` extension, and extract it to your computer. 
+3. Copy the `numpy` folder to your Sublime Text Packages directory.
+   On MacOSX, the directory is `~/Library/Application Support/Sublime Text 3/Packages/`.
+4. Restart Sublime Text.  Use `Ctrl+Backtick` to open the console and check that there is no missing NumPy message.
 
 # License
 
