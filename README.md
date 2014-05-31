@@ -131,7 +131,7 @@ This example fills in totals by price and by item.
 	"[5,1:4]=m[1:5,col].sum()"
 	"[1:5,3]=m[row,1]*m[row,2]"
 
-Note that it must be evaluated (`ctrl+=`) twice to calculate the last cell.
+Note that it must be evaluated (`Ctrl+Comma, Equals`) twice to calculate the last cell.
 
 ### Installation
 
@@ -141,7 +141,7 @@ To use formulas, you must install the Python NumPy package into your Sublime Tex
 2. Rename the `.whl` file with a `.zip` extension, and extract it to your computer. 
 3. Copy the `numpy` folder to your Sublime Text Packages directory.
    On MacOSX, the directory is `~/Library/Application Support/Sublime Text 3/Packages/`.
-4. Restart Sublime Text.  Use `Ctrl+backtick` to open the console and check that there is no missing NumPy message.
+4. Restart Sublime Text.  Use `Ctrl+Backtick` to open the console and check that there is no missing NumPy message.
 
 # License
 
