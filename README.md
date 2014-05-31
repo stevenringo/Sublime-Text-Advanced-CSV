@@ -84,14 +84,14 @@ Row and column numbers in ranges may be prefixed with `+` or `-`, which makes th
 
 For convenience, the range may be shifted one cell in any direction by prefixing the `=` character with a direction modifier.
 
-- `<=<python expression>` Updates the cell to the left of the formula.
-- `>=<python expression>` Updates the cell to the right of the formula.
-- `^=<python expression>` Updates the cell above the formula.
-- `v=<python expression>` Updates the cell below the formula.
+- `<=` Updates the cell to the left of the formula.
+- `>=` Updates the cell to the right of the formula.
+- `^=` Updates the cell above the formula.
+- `v=` Updates the cell below the formula.
 
 The range shift modifier may be used in conjunction with numeric ranges.
 
-- `[:]<=<python expression>` Updates all cells in the column to the left of the formula.
+- `[:]<=` Updates all cells in the column to the left of the formula.
 
 ### Expression syntax
 
