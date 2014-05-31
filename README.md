@@ -43,7 +43,17 @@ To trigger cell evaluation, the contents of a cell must follow a standard patter
 
 `range` defines the set of cells whose contents will be updated, and `python expression` defines the Python expression that will be evaluated.
 
-### Range syntax
+### Installation
+
+To use formulas, you must install the Python NumPy package into your Sublime Text Packages directory.
+
+1. Visit https://pypi.python.org/pypi/numpy and download the Python 3.3 `*.whl` file for your system.  
+2. Rename the `.whl` file with a `.zip` extension, and extract it to your computer. 
+3. Copy the `numpy` folder to your Sublime Text Packages directory.
+   On MacOSX, the directory is `~/Library/Application Support/Sublime Text 3/Packages/`.
+4. Restart Sublime Text.  Use `Ctrl+backtick` to open the console and check that there is no missing NumPy message.
+
+### Ranges
 
 If `range` is left blank, the formula cell itself is replaced.  Unlike Excel, the formula text is not stored separately from the displayed value, so this has the effect of destroying the formula, though the evaluate command can always be undone if that result is unwanted.
 
