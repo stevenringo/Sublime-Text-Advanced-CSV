@@ -111,25 +111,27 @@ Some variables are provided to the evaluator:
 
 This example applies a simple column sum using the NumPy `sum` method.
 
-	item  , price
-	shoes , 12
-	hat   , 2
-	pants , 8
-	shirt , 7.50
-	total ,       ,"<=m[1:5,1].sum()"
+	item  ,price
+	shoes ,12
+	hat   ,2
+	pants ,8
+	shirt ,7.50
+	total ,      ,"<=m[1:5,1].sum()"
 
 ### Example 2
 
 This example fills in totals by price and by item.
 
-	item  , price , qty , total
-	shoes , 12    ,     ,
-	hat   , 2     ,     ,
-	pants , 8     ,     ,
-	shirt , 7.50  ,     ,
-	total ,       ,     ,
+	item  ,price ,qty ,total
+	shoes ,12    ,2   ,
+	hat   ,2     ,1   ,
+	pants ,8     ,1   ,
+	shirt ,7.50  ,2   ,
+	total ,      ,    ,
 	"[5,1:4]=m[1:5,col].sum()"
 	"[1:5,3]=m[row,1]*m[row,2]"
+
+Note that it must be evaluated (`ctrl+=`) twice to calculate the last cell.
 
 ### Installation
 
