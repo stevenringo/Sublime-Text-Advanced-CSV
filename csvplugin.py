@@ -308,6 +308,7 @@ class CSVMatrix:
             return 0
 
     EXPRESSION_RE = re.compile(r'''
+        \s*
         (\[
             (?P<row_begin_mod>[+-])?
             (?P<row_begin>\d+)?
@@ -321,8 +322,12 @@ class CSVMatrix:
             (?P<column_end_mod>[+-])?
             (?P<column_end>\d+)?            
         \])?
+        \s*
         (?P<direction>[<>v^])?
+        \s*
         =
+        \s*
+        (?P<expression>.+)
         ''', re.VERBOSE)
 
     def ApplyModifier(self, value, mod, base_value):
@@ -391,7 +396,7 @@ class CSVMatrix:
 
         target_range = self.ApplyDirectionOffsetToRange(expression_match, target_range)
 
-        expression = value.text[len(expression_match.group(0)):]
+        expression = expression_match.group('expression')
 
         # Expand sheet for target range.
         while target_range[1] >= len(self.rows):
@@ -411,6 +416,7 @@ class CSVMatrix:
                     result = eval(str(expression), None, l)
 
                 except Exception as e:
+                    print("Exception '{0}' evaluating expression for target cell [{1}, {2}].".format(str(e), target_row_index, target_column_index))
                     result = str(e)
 
                 try:
@@ -423,7 +429,7 @@ class CSVMatrix:
                     target_value.text = str(result).ljust(len(target_value.text))
 
                 except IndexError:
-                    print("Invalid expression target cell [{0}, {1}].".format(target_row_index, target_column_index));
+                    print("Invalid expression target cell [{0}, {1}].".format(target_row_index, target_column_index))
 
     def Evaluate(self):
         if not numpy:
