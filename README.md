@@ -1,6 +1,6 @@
 # Sublime Text Advanced CSV
 
-A plugin to manage CSV files, forked from Eric Martel's Sublime-Text-2-CSV-Plugin at ericmartel/Sublime-Text-2-CSV-Plugin.
+A plugin to manage CSV files, forked from Eric Martel's Sublime-Text-2-CSV-Plugin at https://github.com/ericmartel/Sublime-Text-2-CSV-Plugin.
 
 It's often easiest to work with CSV data when the columns are properly lined up.  This plugin provides a command to line up all the columns using spaces (`Justify columns`) and to collapse them back again (`Collapse columns`).
 
