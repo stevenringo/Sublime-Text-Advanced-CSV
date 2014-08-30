@@ -1,4 +1,4 @@
-# Sublime Text 3 CSV Plugin
+# Sublime Text Advanced CSV
 
 A plugin to manage CSV files, forked from Eric Martel's Sublime-Text-2-CSV-Plugin at ericmartel/Sublime-Text-2-CSV-Plugin.
 
