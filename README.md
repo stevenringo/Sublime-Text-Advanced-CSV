@@ -80,7 +80,7 @@ When defining ranges, the `start` cell is updated, but the `end` cell is not.  T
 Row and column numbers in ranges may be prefixed with `+` or `-`, which makes them relative to the formula's location in the document.
 
 - `[:,-1]` Updates all cells in the column immediately to the left of the formula.
-- `[:,+1:+3]` Updates all cells in the two columns immediate to the right of the formula .
+- `[:,+1:+3]` Updates all cells in the two columns immediately to the right of the formula .
 
 For convenience, the range may be shifted one cell in any direction by prefixing the `=` character with a direction modifier.
 
