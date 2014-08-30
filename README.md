@@ -145,7 +145,7 @@ To use formulas, you must install the Python NumPy package into your Sublime Tex
 
 # License
 
-All of Sublime Text 3 CSV Plugin is licensed under the MIT license.
+All of Sublime Text Advanced CSV Plugin is licensed under the MIT license.
 
 Copyright (c) 2014 Wade Brainerd <wadeb@wadeb.com>
 
