@@ -74,8 +74,8 @@ Here are all the variations of this syntax:
 
 When defining ranges, the `start` cell is updated, but the `end` cell is not.  This is intentional, to match NumPy array slice syntax.
 
-- `[0:1]` Updates all cells in row 0.
-- `[1:3]` Updates all cells in rows 1 and 2.
+- `[0:1,:]` Updates all cells in row 0.
+- `[1:3,:]` Updates all cells in rows 1 and 2.
 
 Row and column numbers in ranges may be prefixed with `+` or `-`, which makes them relative to the formula's location in the document.
 
