@@ -20,7 +20,7 @@ Finally, the plugin has full support for RFC 4180 quoting.
 
 The files can be obtained on github:
 
-    $ https://github.com/wadetb/Sublime-Text-3-CSV-Plugin
+    $ https://github.com/wadetb/Sublime-Text-Advanced-CSV
 
 ## Key bindings
 
