@@ -67,6 +67,7 @@ class CSVMatrix:
 
         self.valid = True
 
+    @staticmethod
     def GetCellValue(row, column_index):
         try:
             return row[column_index]
@@ -273,6 +274,7 @@ class CSVMatrix:
 
         return columns
 
+    @staticmethod
     def FromText(text):
         matrix = CSVMatrix()
 
@@ -285,6 +287,7 @@ class CSVMatrix:
 
         return matrix
 
+    @staticmethod
     def FromView(view):
         text = view.substr(sublime.Region(0, view.size()))
 
