@@ -4,7 +4,7 @@
     {"keys": ["ctrl+,","i"], "command": "csv_insert_col"},
     {"keys": ["ctrl+,","d"], "command": "csv_delete_col"},
     {"keys": ["ctrl+,","s"], "command": "csv_select_col"},
-    {"keys": ["ctrl+,"," "], "command": "csv_format_expand"},
+    {"keys": ["ctrl+,","space"], "command": "csv_format_expand"},
     {"keys": ["ctrl+,",","], "command": "csv_format_compact"},
     {"keys": ["ctrl+,","="], "command": "csv_evaluate"}
 ]
