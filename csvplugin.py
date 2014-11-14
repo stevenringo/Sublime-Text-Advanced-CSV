@@ -48,10 +48,12 @@ class CSVValue:
 
 class CSVMatrix:
     def __init__(self):
+        self.settings = sublime.load_settings('Preferences.sublime-settings')
+
         self.rows = []
         self.num_columns = 0
         self.valid = False
-        self.delimiter = ','
+        self.delimiter = self.settings.get('delimiter')
 
     def AddRow(self, row):
         self.rows.append(row)
