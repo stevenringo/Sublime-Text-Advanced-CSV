@@ -100,7 +100,7 @@ class CSVMatrix:
     def DeleteTrailingColumns(self, column_index):
         for row in self.rows:
             last_column_index = 0
-            
+
             for column_index, value in enumerate(row):
                 if len(value.text.strip()) > 0:
                     last_column_index = column_index
@@ -323,7 +323,7 @@ class CSVMatrix:
             (?P<column_begin>\d+)?
             (?P<column_delim>:)?
             (?P<column_end_mod>[+-])?
-            (?P<column_end>\d+)?            
+            (?P<column_end>\d+)?
         \])?
         \s*
         (?P<direction>[<>v^])?
@@ -340,7 +340,7 @@ class CSVMatrix:
             return base_value - value
         else:
             return value
-    
+
     def GetCoordinateRange(self, begin_mod, begin, delim, end_mod, end, base_value):
         if delim:
             if begin is None:
@@ -376,7 +376,7 @@ class CSVMatrix:
         column_end_mod = coordinate_match.group('column_end_mod')
         column_end = coordinate_match.group('column_end')
 
-        column_range = self.GetCoordinateRange(column_begin_mod, column_begin, column_delim, column_end_mod, column_end, base_column_index) 
+        column_range = self.GetCoordinateRange(column_begin_mod, column_begin, column_delim, column_end_mod, column_end, base_column_index)
 
         return (row_range[0], row_range[1], column_range[0], column_range[1])
 
@@ -408,7 +408,7 @@ class CSVMatrix:
             self.column_widths.append(0)
 
         for target_row_index in range(target_range[0], target_range[1]):
-            for target_column_index in range(target_range[2], target_range[3]): 
+            for target_column_index in range(target_range[2], target_range[3]):
                 try:
                     l = {}
                     l['m'] = m
@@ -482,7 +482,7 @@ class CsvSortByColAscCommand(sublime_plugin.WindowCommand):
             use_header = picked == 0
 
             self.matrix.SortByColumn(self.column_index, SortDirection.Ascending, use_header)
-            
+
             output = self.matrix.Format()
 
             self.view.run_command('csv_set_output', {'output': output, 'saved_selection': self.saved_selection})
@@ -507,7 +507,7 @@ class CsvSortByColDescCommand(sublime_plugin.WindowCommand):
             use_header = picked == 0
 
             self.matrix.SortByColumn(self.column_index, SortDirection.Descending, use_header)
-            
+
             output = self.matrix.Format()
 
             self.view.run_command('csv_set_output', {'output': output, 'saved_selection': self.saved_selection})
