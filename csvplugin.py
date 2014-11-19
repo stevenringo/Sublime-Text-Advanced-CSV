@@ -48,12 +48,16 @@ class CSVValue:
 
 class CSVMatrix:
     def __init__(self):
-        self.settings = sublime.load_settings('Preferences.sublime-settings')
+        self.settings = sublime.load_settings('AdvancedCSV.sublime-settings')
 
         self.rows = []
         self.num_columns = 0
         self.valid = False
+
         self.delimiter = self.settings.get('delimiter')
+        if not isinstance(self.delimiter, str) or len(self.delimiter) != 1:
+            print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
+            self.delimiter = ','
 
     def AddRow(self, row):
         self.rows.append(row)

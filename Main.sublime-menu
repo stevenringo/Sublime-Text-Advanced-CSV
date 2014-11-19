@@ -59,5 +59,40 @@
                 ]
             }
         ]
+    },
+    {
+        "id": "preferences",
+        "children":
+        [
+            {
+                "caption": "Package Settings",
+                "id": "package-settings",
+                "children":
+                [
+                    {
+                        "caption": "Advanced CSV",
+                        "children":
+                        [
+                            {
+                                "caption": "Settings – Default",
+                                "command": "open_file",
+                                "args":
+                                {
+                                    "file": "${packages}/Sublime-Text-Advanced-CSV/AdvancedCSV.sublime-settings"
+                                }
+                            },
+                            {
+                                "caption": "Settings – User",
+                                "command": "open_file",
+                                "args":
+                                {
+                                    "file": "${packages}/User/AdvancedCSV.sublime-settings"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
     }
 ]
