@@ -4,15 +4,24 @@
 import sublime
 import sublime_plugin
 
-import re
+import re, sys, os
+
+directory = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(directory)
+
+from tinynumpy import tinynumpy
 
 try:
     import numpy
 except ImportError:
-    print("=== NumPy disabled ===")
-    print("To enable cell evaluation, download NumPy from https://pypi.python.org/pypi/numpy")
-    print("and install it into your Sublime Text Packages directory.")
+    print("=== NumPy disabled, using TinyNumPy instead ===")
+    print("To enable cell evaluation using the full NumPy, download NumPy from:")
+    print("    https://pypi.python.org/pypi/numpy")
+    print("and install it into Sublime Text's Packages directory.")
+    print("For information on the features and limitations of TinyNumPy, visit:")
+    print("    https://github.com/wadetb/tinynumpy")
     print("======================")
+    numpy = tinynumpy
 
 class SortDirection:
     Ascending = 1
