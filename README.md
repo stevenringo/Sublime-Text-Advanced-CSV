@@ -24,8 +24,8 @@ The files can be obtained on GitHub:
 
 Or via Package Control (https://sublime.wbond.net):
 
-	1. Use the *Package Control: Install Package* command from the command palette.
-	2. A list of packages will appear.  Type `Advanced CSV` and press enter.
+1. Use the *Package Control: Install Package* command from the command palette.
+2. A list of packages will appear.  Type `Advanced CSV` and press enter.
 
 Using Package Control ensures that the Advanced CSV plugin stays up to date.
 
