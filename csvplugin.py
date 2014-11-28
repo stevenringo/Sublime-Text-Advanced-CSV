@@ -5,6 +5,7 @@ import sublime
 import sublime_plugin
 
 import re, sys, os
+from math import *
 
 directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(directory)
