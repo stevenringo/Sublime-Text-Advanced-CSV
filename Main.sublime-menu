@@ -78,7 +78,7 @@
                                 "command": "open_file",
                                 "args":
                                 {
-                                    "file": "${packages}/Sublime-Text-Advanced-CSV/AdvancedCSV.sublime-settings"
+                                    "file": "${packages}/Advanced CSV/AdvancedCSV.sublime-settings"
                                 }
                             },
                             {
