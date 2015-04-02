@@ -7,6 +7,15 @@ import sublime_plugin
 import re, sys, os
 from math import *
 
+# http://stackoverflow.com/questions/11301138/how-to-check-if-variable-is-string-with-python-2-and-3-compatibility
+try:
+    isinstance("", basestring)
+    def isstr(s):
+        return isinstance(s, basestring)
+except NameError:
+    def isstr(s):
+        return isinstance(s, str)
+
 directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(directory)
 
@@ -65,7 +74,7 @@ class CSVMatrix:
         self.valid = False
 
         self.delimiter = self.settings.get('delimiter')
-        if not isinstance(self.delimiter, basestring) or len(self.delimiter) != 1:
+        if not isstr(self.delimiter) or len(self.delimiter) != 1:
             print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
             self.delimiter = ','
 
