@@ -1,3 +1,4 @@
 {
-  "delimiter": ","
+  "delimiter": ",",
+  "auto_quote": true
 }

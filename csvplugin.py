@@ -69,6 +69,8 @@ class CSVMatrix:
             print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
             self.delimiter = ','
 
+        self.auto_quote = self.settings.get('auto_quote')
+
     def AddRow(self, row):
         self.rows.append(row)
 
@@ -160,6 +162,8 @@ class CSVMatrix:
             view.sel().add(region)
 
     def QuoteText(self, text):
+        if not self.auto_quote:
+            return text
         if self.delimiter in text or '"' in text:
             return '"' + text.replace('"', '""') + '"'
         else:
@@ -262,19 +266,26 @@ class CSVMatrix:
                 next_char = None
 
             if char == '"' and next_char == '"':
-                currentword += '"'
+                if self.auto_quote:
+                    currentword += '"'
+                else:
+                    currentword += '""'
                 char_index += 2
                 continue
 
             if insidequotes:
                 if char == '"':
                     insidequotes = False
+                    if not self.auto_quote:
+                        currentword += char
                 else:
                     currentword += char
 
             else:
                 if char == '"':
                     insidequotes = True
+                    if not self.auto_quote:
+                        currentword += char
 
                 elif char == self.delimiter:
                     columns.append(CSVValue(currentword, first_char_index, char_index))
