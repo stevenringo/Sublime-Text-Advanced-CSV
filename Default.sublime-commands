@@ -34,5 +34,9 @@
     {
         "command": "csv_evaluate",
         "caption": "CSV: Evaluate cells"
+    },
+    {
+        "command": "csv_format",
+        "caption": "CSV: Format"
     }
 ]

@@ -662,3 +662,79 @@ class CsvEvaluateCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, sublime.Region(0, self.view.size()), output);
 
         matrix.RestoreSelection(self.view, saved_selection)
+        
+class CsvFormatCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        view = self.window.active_view()
+        self.matrix = CSVMatrix.FromView(view)
+        if not self.matrix.valid:
+            sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
+            return
+
+        self.window.show_input_panel('Format (Values as 0 based column between {})', "",
+            self.on_done, self.on_change, self.on_cancel)
+
+    def on_done(self, input):
+        use_header = GetFileSetting(self.window.active_view(), 'use_header')
+        
+        output = ''
+        numrows = len(self.matrix.rows)
+        for rowindex, row in enumerate(self.matrix.rows):
+            formatted_row = input
+            for columnindex, column in enumerate(row):                
+                formatted_row = formatted_row.replace('{' + str(columnindex) + '}', str(column.text))                                
+            output += formatted_row
+            if rowindex < (numrows - 1):
+                output += '\n'
+
+        view = self.window.new_file()
+        view.set_name('Formatted Output')
+        view.set_scratch(True)
+
+        view.run_command('csv_set_output', {'output': output});
+
+    def on_change(self, input):
+        pass
+
+    def on_cancel(self):
+        pass
+
+def SetFileSetting(view, key, value):
+    filename = view.file_name()
+    settings = sublime.load_settings(__name__ + '.sublime-settings')
+
+    filesettings = settings.get('csv_per_file_setting', [])
+
+    foundsetting = False
+
+    for filesetting in filesettings:
+        if filesetting['file'] == filename:
+            foundsetting = True
+            filesetting[key] = value
+            break
+
+    if not foundsetting:
+        filesetting = {}
+        filesetting['file'] = filename
+        filesetting[key] = value
+        filesettings.append(filesetting)
+
+    settings.set('csv_per_file_setting', filesettings)
+    sublime.save_settings(__name__ + '.sublime-settings')
+
+def GetFileSetting(view, key):
+    filename = view.file_name()
+    settings = sublime.load_settings(__name__ + '.sublime-settings')
+
+    filesettings = settings.get('csv_per_file_setting', [])
+
+    foundsetting = False
+
+    for filesetting in filesettings:
+        if filesetting['file'] == filename:
+            return filesetting[key]
+
+    if not foundsetting:
+        return False
+
+
