@@ -48,6 +48,10 @@
             {
                 "command": "csv_evaluate",
                 "caption": "Evaluate cells"
+            },
+            {
+                "command": "csv_format",
+                "caption": "Format by template"
             }
         ]
     }

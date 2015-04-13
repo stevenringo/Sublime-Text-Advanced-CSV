@@ -6,5 +6,6 @@
     {"keys": ["ctrl+,","s"], "command": "csv_select_col"},
     {"keys": ["ctrl+,"," "], "command": "csv_format_expand"},
     {"keys": ["ctrl+,",","], "command": "csv_format_compact"},
-    {"keys": ["ctrl+,","="], "command": "csv_evaluate"}
+    {"keys": ["ctrl+,","="], "command": "csv_evaluate"},
+    {"keys": ["ctrl+,","f"], "command": "csv_format"}
 ]

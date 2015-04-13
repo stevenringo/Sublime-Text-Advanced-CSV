@@ -674,9 +674,7 @@ class CsvFormatCommand(sublime_plugin.WindowCommand):
         self.window.show_input_panel('Format (Values as 0 based column between {})', "",
             self.on_done, self.on_change, self.on_cancel)
 
-    def on_done(self, input):
-        use_header = GetFileSetting(self.window.active_view(), 'use_header')
-        
+    def on_done(self, input):             
         output = ''
         numrows = len(self.matrix.rows)
         for rowindex, row in enumerate(self.matrix.rows):
@@ -698,43 +696,3 @@ class CsvFormatCommand(sublime_plugin.WindowCommand):
 
     def on_cancel(self):
         pass
-
-def SetFileSetting(view, key, value):
-    filename = view.file_name()
-    settings = sublime.load_settings(__name__ + '.sublime-settings')
-
-    filesettings = settings.get('csv_per_file_setting', [])
-
-    foundsetting = False
-
-    for filesetting in filesettings:
-        if filesetting['file'] == filename:
-            foundsetting = True
-            filesetting[key] = value
-            break
-
-    if not foundsetting:
-        filesetting = {}
-        filesetting['file'] = filename
-        filesetting[key] = value
-        filesettings.append(filesetting)
-
-    settings.set('csv_per_file_setting', filesettings)
-    sublime.save_settings(__name__ + '.sublime-settings')
-
-def GetFileSetting(view, key):
-    filename = view.file_name()
-    settings = sublime.load_settings(__name__ + '.sublime-settings')
-
-    filesettings = settings.get('csv_per_file_setting', [])
-
-    foundsetting = False
-
-    for filesetting in filesettings:
-        if filesetting['file'] == filename:
-            return filesetting[key]
-
-    if not foundsetting:
-        return False
-
-
