@@ -1,3 +1,5 @@
 csv.sublime-project
 csv.sublime-workspace
 *.pyc
+*.sublime-project
+*.sublime-workspace

@@ -671,8 +671,10 @@ class CsvFormatCommand(sublime_plugin.WindowCommand):
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        self.window.show_input_panel('Format (Values as 0 based column between {})', "",
+        self.window.show_input_panel('Format (ex. {0} ... {1})', "",
             self.on_done, self.on_change, self.on_cancel)
+
+    CELL_RE = re.compile(r'{\d+}')
 
     def on_done(self, input):             
         output = ''
@@ -680,7 +682,8 @@ class CsvFormatCommand(sublime_plugin.WindowCommand):
         for rowindex, row in enumerate(self.matrix.rows):
             formatted_row = input
             for columnindex, column in enumerate(row):                
-                formatted_row = formatted_row.replace('{' + str(columnindex) + '}', str(column.text))                                
+                formatted_row = formatted_row.replace('{' + str(columnindex) + '}', str(column.text))
+            formatted_row = CsvFormatCommand.CELL_RE.sub('', formatted_row)
             output += formatted_row
             if rowindex < (numrows - 1):
                 output += '\n'

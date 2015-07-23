@@ -1,13 +1,13 @@
 [
     {
         "caption": "Tools",
-        "mnemonic": "t",
+        "mnemonic": "T",
         "id": "tools",
         "children":
         [
             {
                 "caption": "CSV",
-                "mnemonic": "c",
+                "mnemonic": "C",
                 "id": "csv",
                 "children":
                 [
