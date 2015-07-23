@@ -66,19 +66,27 @@ class CSVValue:
     def __eq__(self, other): return self.Compare(other) == 0
 
 class CSVMatrix:
-    def __init__(self):
-        self.settings = sublime.load_settings('AdvancedCSV.sublime-settings')
-
+    def __init__(self, view):
         self.rows = []
         self.num_columns = 0
         self.valid = False
+        self.view = view
 
-        self.delimiter = self.settings.get('delimiter')
+        self.settings = sublime.load_settings('AdvancedCSV.sublime-settings')
+        
+        self.delimiter = self.GetSetting( 'delimiter', ',' )
+
         if not isstr(self.delimiter) or len(self.delimiter) != 1:
             print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
             self.delimiter = ','
 
-        self.auto_quote = self.settings.get('auto_quote')
+        self.auto_quote = self.GetSetting( 'auto_quote', True )
+
+    def GetSetting(self, name, default):
+        if self.view.settings().has(name):
+            return self.view.settings().get(name)
+        else:
+            return self.settings.get(name, default)
 
     def AddRow(self, row):
         self.rows.append(row)
@@ -311,8 +319,10 @@ class CSVMatrix:
         return columns
 
     @staticmethod
-    def FromText(text):
-        matrix = CSVMatrix()
+    def FromView(view):
+        matrix = CSVMatrix(view)
+
+        text = view.substr(sublime.Region(0, view.size()))
 
         for line in text.split("\n"):
             row = matrix.ParseRow(line)
@@ -322,12 +332,6 @@ class CSVMatrix:
         matrix.Finalize()
 
         return matrix
-
-    @staticmethod
-    def FromView(view):
-        text = view.substr(sublime.Region(0, view.size()))
-
-        return CSVMatrix.FromText(text)
 
     def GetColumnIndexFromCursor(self, view):
         selection = view.sel()[0]
@@ -693,6 +697,24 @@ class CsvFormatCommand(sublime_plugin.WindowCommand):
         view.set_scratch(True)
 
         view.run_command('csv_set_output', {'output': output});
+
+    def on_change(self, input):
+        pass
+
+    def on_cancel(self):
+        pass
+
+class CsvSetDelimiterCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        view = self.window.active_view()
+
+        self.window.show_input_panel('Delimiter character', "",
+            self.on_done, self.on_change, self.on_cancel)
+
+    def on_done(self, input):
+        view = self.window.active_view()
+
+        view.settings().set('delimiter', input)
 
     def on_change(self, input):
         pass

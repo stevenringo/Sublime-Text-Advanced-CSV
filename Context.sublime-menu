@@ -43,6 +43,10 @@
                 "caption": "Delete empty trailing columns"
             },
             {
+                "command": "csv_set_delimiter",
+                "caption": "Set delimiter"
+            },
+            {
                 "caption": "-"
             },
             {

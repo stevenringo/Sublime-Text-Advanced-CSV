@@ -32,6 +32,10 @@
         "caption": "CSV: Delete empty trailing columns"
     },
     {
+        "command": "csv_set_delimiter",
+        "caption": "CSV: Set delimiter"
+    },
+    {
         "command": "csv_evaluate",
         "caption": "CSV: Evaluate cells"
     },
