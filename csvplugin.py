@@ -217,7 +217,7 @@ class CSVMatrix:
             row_text = ''
 
             for column_index, value in enumerate(row):
-                quoted_trimmed_text = self.QuoteText(value.text).strip()
+                quoted_trimmed_text = self.QuoteText(value.text.strip())
 
                 row_text += quoted_trimmed_text
 
