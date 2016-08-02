@@ -4,7 +4,7 @@
 import sublime
 import sublime_plugin
 
-import re, sys, os
+import fnmatch, os, re, sys
 from math import *
 
 # http://stackoverflow.com/questions/11301138/how-to-check-if-variable-is-string-with-python-2-and-3-compatibility
@@ -73,24 +73,35 @@ class CSVMatrix:
         self.view = view
 
         self.settings = sublime.load_settings('AdvancedCSV.sublime-settings')
-        
-        self.delimiter = self.GetSetting( 'delimiter', ',' )
 
-        # Special case for recognizing '\t' for tabs.
-        if self.delimiter == '\\t':
-            self.delimiter = '\t'
-
+        self.DetermineDelimiter()
         if not isstr(self.delimiter) or len(self.delimiter) != 1:
             print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
             self.delimiter = ','
+        print("Using delimiter: '{0}'.".format(self.delimiter))
 
-        self.auto_quote = self.GetSetting( 'auto_quote', True )
+        self.auto_quote = self.GetViewSetting( 'auto_quote', True )
 
-    def GetSetting(self, name, default):
+    def GetViewSetting(self, name, default):
         if self.view.settings().has(name):
             return self.view.settings().get(name)
         else:
             return self.settings.get(name, default)
+
+    def DetermineDelimiter(self):
+        filename = self.view.file_name()
+
+        self.delimiter_mapping = self.settings.get('delimiter_mapping', {})
+        for k, v in self.delimiter_mapping.items():
+            if fnmatch.fnmatch(filename, k):
+                self.delimiter = v
+                return
+
+        self.delimiter = self.GetViewSetting('delimiter', ',')
+
+        # Special case for recognizing '\t' for tabs.
+        if self.delimiter == '\\t':
+            self.delimiter = '\t'
 
     def AddRow(self, row):
         self.rows.append(row)
