@@ -10,7 +10,7 @@ An entire column may be block selected (`Select column`), which enables complex 
 
 The plugin includes a command to clean up empty trailing commas from rows, which are often left when opening a CSV file in Excel.
 
-With NumPy (http://www.numpy.org) installed into one of Sublime Text's package directories (or using TinyNumPy when NumPy is unavailable), the plugin supports evaluating Python expressions over ranges of cells, in a manner similar to formulas in Excel. 
+Using NumPy (http://www.numpy.org), the plugin supports evaluating Python expressions over ranges of cells, in a manner similar to formulas in Excel. 
 
 All the above features work in both justified and collapsed modes.
 
@@ -41,6 +41,7 @@ Key                  | Action
 `Ctrl+Comma, Space`  | Justify columns
 `Ctrl+Comma, Comma`  | Collapse columns
 `Ctrl+Comma, Equals` | Evaluate cells
+`Ctrl+Comma, f`      | Format cells using a template string
 
 ## Formulas
 
@@ -139,18 +140,6 @@ This example fills in totals by price and by item.
 	"[1:5,3]=m[row,1]*m[row,2]"
 
 Note that it must be evaluated (`Ctrl+Comma, Equals`) twice to calculate the last cell.
-
-### Installation
-
-If NumPy is installed into a directory visible from Sublime Text's embedded Python interpreter, it will be used for expression evaluation.  Otherwise, an included copy of TinyNumPy is used.  For information about the features and limitations of TinyNumPy, see https://github.com/wadetb/tinynumpy.
-
-To install full NumPy, you must install the Python NumPy package into Sublime Text's Packages directory.
-
-1. Visit https://pypi.python.org/pypi/numpy and download the Python 3.3 `*.whl` file for your system.  
-2. Rename the `.whl` file with a `.zip` extension, and extract it to your computer. 
-3. Copy the `numpy` folder to your Sublime Text Packages directory.
-   On MacOSX, the directory is `~/Library/Application Support/Sublime Text 3/Packages/`.
-4. Restart Sublime Text.  Use `Ctrl+Backtick` to open the console and check that there is no missing NumPy message.
 
 # License
 

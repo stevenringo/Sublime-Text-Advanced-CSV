@@ -41,6 +41,6 @@
     },
     {
         "command": "csv_format",
-        "caption": "CSV: Format"
+        "caption": "CSV: Format using template"
     }
 ]
