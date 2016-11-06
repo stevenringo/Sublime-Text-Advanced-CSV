@@ -170,7 +170,8 @@ class CSVMatrix:
                 region = sublime.Region(a, b)
                 view.sel().add(region)
 
-    def SaveSelection(self, view):
+    @staticmethod
+    def SaveSelection(view):
         saved_selection = []
 
         for region in view.sel():
@@ -183,7 +184,8 @@ class CSVMatrix:
 
         return saved_selection
 
-    def RestoreSelection(self, view, saved_selection):
+    @staticmethod
+    def RestoreSelection(view, saved_selection):
         view.sel().clear()
 
         for rowcol_region in saved_selection:
@@ -514,8 +516,11 @@ class CSVMatrix:
 
 class CsvSetOutputCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        if args['output'] != None:
+        if 'output' in args:
             self.view.replace(edit, sublime.Region(0, self.view.size()), args['output']);
+        
+        if 'saved_selection' in args:
+            CSVMatrix.RestoreSelection(self.view, args['saved_selection'])
 
 class CsvSortByColAscCommand(sublime_plugin.TextCommand):
     def run(self, edit):
