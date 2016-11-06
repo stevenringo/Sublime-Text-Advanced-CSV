@@ -78,7 +78,7 @@ class CSVMatrix:
         if not isstr(self.delimiter) or len(self.delimiter) != 1:
             print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
             self.delimiter = ','
-        print("Using delimiter: '{0}'.".format(self.delimiter))
+        #print("Using delimiter: '{0}'.".format(self.delimiter))
 
         self.auto_quote = self.GetViewSetting( 'auto_quote', True )
 
