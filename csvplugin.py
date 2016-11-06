@@ -76,6 +76,10 @@ class CSVMatrix:
         
         self.delimiter = self.GetSetting( 'delimiter', ',' )
 
+        # Special case for recognizing '\t' for tabs.
+        if self.delimiter == '\\t':
+            self.delimiter = '\t'
+
         if not isstr(self.delimiter) or len(self.delimiter) != 1:
             print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
             self.delimiter = ','
@@ -499,58 +503,50 @@ class CSVMatrix:
 
 class CsvSetOutputCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
-        if(args['output'] != None):
+        if args['output'] != None:
             self.view.replace(edit, sublime.Region(0, self.view.size()), args['output']);
 
-class CsvSortByColAscCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        self.view = self.window.active_view()
-
+class CsvSortByColAscCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
         self.matrix = CSVMatrix.FromView(self.view)
         if not self.matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
-        self.column_index = self.matrix.GetColumnIndexFromCursor(self.view)
-
         self.saved_selection = self.matrix.SaveSelection(self.view)
 
-        sublime.set_timeout(lambda: self.window.show_quick_panel(['Use header row', 'Don\'t use header row'], self.on_select_header_done), 10)
+        self.view.window().show_quick_panel(['Use header row', 'Don\'t use header row'], self.on_select_header_done)
 
     def on_select_header_done(self, picked):
-        if picked >= 0:
-            use_header = picked == 0
+        if picked < 0:
+            return
+        use_header = picked == 0
 
-            self.matrix.SortByColumn(self.column_index, SortDirection.Ascending, use_header)
+        column_index = self.matrix.GetColumnIndexFromCursor(self.view)
+        self.matrix.SortByColumn(column_index, SortDirection.Ascending, use_header)
+        output = self.matrix.Format()
 
-            output = self.matrix.Format()
+        self.view.run_command('csv_set_output', {'output': output, 'saved_selection': self.saved_selection})
 
-            self.view.run_command('csv_set_output', {'output': output, 'saved_selection': self.saved_selection})
-
-class CsvSortByColDescCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        self.view = self.window.active_view()
-
+class CsvSortByColDescCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
         self.matrix = CSVMatrix.FromView(self.view)
         if not self.matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
-        self.column_index = self.matrix.GetColumnIndexFromCursor(self.view)
-
         self.saved_selection = self.matrix.SaveSelection(self.view)
 
-        sublime.set_timeout(lambda: self.window.show_quick_panel(['Use header row', 'Don\'t use header row'], self.on_select_header_done), 10)
+        self.view.window().show_quick_panel(['Use header row', 'Don\'t use header row'], self.on_select_header_done)
 
     def on_select_header_done(self, picked):
-        if picked >= 0:
-            use_header = picked == 0
+        if picked < 0:
+            return
+        use_header = picked == 0
 
-            self.matrix.SortByColumn(self.column_index, SortDirection.Descending, use_header)
+        column_index = self.matrix.GetColumnIndexFromCursor(self.view)
+        self.matrix.SortByColumn(column_index, SortDirection.Descending, use_header)
+        output = self.matrix.Format()
 
-            output = self.matrix.Format()
-
-            self.view.run_command('csv_set_output', {'output': output, 'saved_selection': self.saved_selection})
+        self.view.run_command('csv_set_output', {'output': output, 'saved_selection': self.saved_selection})
 
 class CsvInsertColCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -558,17 +554,14 @@ class CsvInsertColCommand(sublime_plugin.TextCommand):
         if not matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
         saved_selection = matrix.SaveSelection(self.view)
 
         column_index = matrix.GetColumnIndexFromCursor(self.view)
-
         matrix.InsertColumn(column_index)
 
         output = matrix.Format()
 
         self.view.replace(edit, sublime.Region(0, self.view.size()), output);
-
         matrix.RestoreSelection(self.view, saved_selection)
 
 class CsvDeleteColCommand(sublime_plugin.TextCommand):
@@ -577,17 +570,14 @@ class CsvDeleteColCommand(sublime_plugin.TextCommand):
         if not matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
         saved_selection = matrix.SaveSelection(self.view)
 
         column_index = matrix.GetColumnIndexFromCursor(self.view)
-
         matrix.DeleteColumn(column_index)
 
         output = matrix.Format()
 
         self.view.replace(edit, sublime.Region(0, self.view.size()), output);
-
         matrix.RestoreSelection(self.view, saved_selection)
 
 class CsvDeleteTrailingColsCommand(sublime_plugin.TextCommand):
@@ -596,17 +586,14 @@ class CsvDeleteTrailingColsCommand(sublime_plugin.TextCommand):
         if not matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
         saved_selection = matrix.SaveSelection(self.view)
 
         column_index = matrix.GetColumnIndexFromCursor(self.view)
-
         matrix.DeleteTrailingColumns(column_index)
 
         output = matrix.Format()
 
         self.view.replace(edit, sublime.Region(0, self.view.size()), output);
-
         matrix.RestoreSelection(self.view, saved_selection)
 
 class CsvSelectColCommand(sublime_plugin.TextCommand):
@@ -617,38 +604,33 @@ class CsvSelectColCommand(sublime_plugin.TextCommand):
             return
 
         column_index = matrix.GetColumnIndexFromCursor(self.view)
-
         matrix.SelectColumn(column_index, self.view)
 
-class CsvFormatCompactCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        view = self.window.active_view()
-
-        matrix = CSVMatrix.FromView(view)
+class CsvFormatCompactCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        matrix = CSVMatrix.FromView(self.view)
         if not matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
-        saved_selection = matrix.SaveSelection(view)
+        saved_selection = matrix.SaveSelection(self.view)
 
         output = matrix.FormatCompacted()
 
-        view.run_command('csv_set_output', {'output': output, 'saved_selection': saved_selection})
+        self.view.replace(edit, sublime.Region(0, self.view.size()), output);
+        matrix.RestoreSelection(self.view, saved_selection)
 
-class CsvFormatExpandCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        view = self.window.active_view()
-
-        matrix = CSVMatrix.FromView(view)
+class CsvFormatExpandCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        matrix = CSVMatrix.FromView(self.view)
         if not matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
-        saved_selection = matrix.SaveSelection(view)
+        saved_selection = matrix.SaveSelection(self.view)
 
         output = matrix.FormatExpanded()
 
-        view.run_command('csv_set_output', {'output': output, 'saved_selection': saved_selection})
+        self.view.replace(edit, sublime.Region(0, self.view.size()), output);
+        matrix.RestoreSelection(self.view, saved_selection)
 
 class CsvEvaluateCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -656,26 +638,22 @@ class CsvEvaluateCommand(sublime_plugin.TextCommand):
         if not matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
-
         saved_selection = matrix.SaveSelection(self.view)
 
         matrix.Evaluate()
-
         output = matrix.Format()
 
         self.view.replace(edit, sublime.Region(0, self.view.size()), output);
-
         matrix.RestoreSelection(self.view, saved_selection)
         
-class CsvFormatCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        view = self.window.active_view()
-        self.matrix = CSVMatrix.FromView(view)
+class CsvFormatCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        self.matrix = CSVMatrix.FromView(self.view)
         if not self.matrix.valid:
             sublime.error_message(__name__ + ": The buffer doesn't appear to be a CSV file")
             return
 
-        self.window.show_input_panel('Format (ex. {0} ... {1})', "",
+        self.view.window().show_input_panel('Format (ex. the {0} jumped over the {1})', "",
             self.on_done, self.on_change, self.on_cancel)
 
     CELL_RE = re.compile(r'{\d+}')
@@ -692,7 +670,7 @@ class CsvFormatCommand(sublime_plugin.WindowCommand):
             if rowindex < (numrows - 1):
                 output += '\n'
 
-        view = self.window.new_file()
+        view = self.view.window().new_file()
         view.set_name('Formatted Output')
         view.set_scratch(True)
 
@@ -704,17 +682,13 @@ class CsvFormatCommand(sublime_plugin.WindowCommand):
     def on_cancel(self):
         pass
 
-class CsvSetDelimiterCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        view = self.window.active_view()
-
-        self.window.show_input_panel('Delimiter character', "",
+class CsvSetDelimiterCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        self.view.window().show_input_panel('Delimiter character', "",
             self.on_done, self.on_change, self.on_cancel)
 
     def on_done(self, input):
-        view = self.window.active_view()
-
-        view.settings().set('delimiter', input)
+        self.view.settings().set('delimiter', input)
 
     def on_change(self, input):
         pass
