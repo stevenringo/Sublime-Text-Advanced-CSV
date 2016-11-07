@@ -91,11 +91,12 @@ class CSVMatrix:
     def DetermineDelimiter(self):
         filename = self.view.file_name()
 
-        self.delimiter_mapping = self.settings.get('delimiter_mapping', {})
-        for k, v in self.delimiter_mapping.items():
-            if fnmatch.fnmatch(filename, k):
-                self.delimiter = v
-                return
+        if filename:
+            self.delimiter_mapping = self.settings.get('delimiter_mapping', {})
+            for k, v in self.delimiter_mapping.items():
+                if fnmatch.fnmatch(filename, k):
+                    self.delimiter = v
+                    return
 
         self.delimiter = self.GetViewSetting('delimiter', ',')
 
