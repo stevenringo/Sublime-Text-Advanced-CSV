@@ -1,8 +1,6 @@
 CSV by Wade Brainerd (wadetb@gmail.com / www.wadeb.com)
 Forked from CSV by Eric Martel (emartel@gmail.com / www.ericmartel.com)
 
-Thank you for installing CSV. All commands are available through keyboard shortcuts, menus, context menus and the command palette.
+Thank you for installing Advanced CSV. All commands are available through keyboard shortcuts, menus, context menus and the command palette.
 
-To enable cell evaluation, download NumPy from https://pypi.python.org/pypi/numpy, and install it into your Sublime Text Packages directory.
-
-Please direct any feedback to wadetb@gmail.com or through github at https://github.com/wadetb/Sublime-Text-Advanced-CSV.
+Please direct any feedback to wadetb@gmail.com or through GitHub at https://github.com/wadetb/Sublime-Text-Advanced-CSV.
