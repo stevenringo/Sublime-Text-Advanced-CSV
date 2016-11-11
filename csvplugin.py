@@ -74,35 +74,47 @@ class CSVMatrix:
 
         self.settings = sublime.load_settings('AdvancedCSV.sublime-settings')
 
-        self.DetermineDelimiter()
-        if not isstr(self.delimiter) or len(self.delimiter) != 1:
-            print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
-            self.delimiter = ','
-        #print("Using delimiter: '{0}'.".format(self.delimiter))
+        self.ChooseDelimiter()
 
-        self.auto_quote = self.GetViewSetting( 'auto_quote', True )
+        self.auto_quote = self.GetViewOrUserSetting( 'auto_quote', True )
 
-    def GetViewSetting(self, name, default):
+    def GetViewOrUserSetting(self, name, default):
         if self.view.settings().has(name):
             return self.view.settings().get(name)
         else:
             return self.settings.get(name, default)
 
-    def DetermineDelimiter(self):
-        filename = self.view.file_name()
+    def ChooseDelimiter(self):
+        self.delimiter = None
 
-        if filename:
-            self.delimiter_mapping = self.settings.get('delimiter_mapping', {})
-            for k, v in self.delimiter_mapping.items():
-                if fnmatch.fnmatch(filename, k):
-                    self.delimiter = v
-                    return
+        # Highest priority: per-view saved setting (CSV -> Set Delimiter).
+        if self.view.settings().has('delimiter'):
+            self.delimiter = self.view.settings().get('delimiter')
 
-        self.delimiter = self.GetViewSetting('delimiter', ',')
+        # Second highest priority: filename-based matching
+        if not self.delimiter:
+            filename = self.view.file_name()
+
+            if filename:
+                self.delimiter_mapping = self.settings.get('delimiter_mapping', {})
+                for k, v in self.delimiter_mapping.items():
+                    if fnmatch.fnmatch(filename, k):
+                        self.delimiter = v
+                        break
+
+        # Final priority: user or system setting, fallback to comma. 
+        if not self.delimiter:
+            self.delimiter = self.settings.get('delimiter', ',')
 
         # Special case for recognizing '\t' for tabs.
         if self.delimiter == '\\t':
             self.delimiter = '\t'
+
+        if not isstr(self.delimiter) or len(self.delimiter) != 1:
+            print("'{0}' is not a valid delimiter, reverting to ','.".format(self.delimiter))
+            self.delimiter = ','
+
+        print("Using delimiter: '{0}'.".format(self.delimiter))
 
     def AddRow(self, row):
         self.rows.append(row)
