@@ -307,24 +307,20 @@ class CSVMatrix:
         while char_index < len(row):
             char = row[char_index]
 
-            if char_index < len(row) - 1:
-                next_char = row[char_index + 1]
-            else:
-                next_char = None
-
-            if char == '"' and next_char == '"':
-                if self.auto_quote:
-                    currentword += '"'
-                else:
-                    currentword += '""'
-                char_index += 2
-                continue
-
             if insidequotes:
                 if char == '"':
+                    if char_index < len(row) - 1 and row[char_index + 1] == '"':
+                        if self.auto_quote:
+                            currentword += '"'
+                        else:
+                            currentword += '""'
+                        char_index += 2
+                        continue
+                     
                     insidequotes = False
                     if not self.auto_quote:
                         currentword += char
+                        
                 else:
                     currentword += char
 

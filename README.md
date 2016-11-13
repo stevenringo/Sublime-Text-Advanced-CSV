@@ -14,7 +14,7 @@ Using NumPy (http://www.numpy.org), the plugin supports evaluating Python expres
 
 All the above features work in both justified and collapsed modes.
 
-Finally, the plugin has full support for RFC 4180 quoting.
+Finally, the plugin fully supports RFC 4180 (https://tools.ietf.org/html/rfc4180) quoting, with the exception that quoted newlines (2.6) are treated as row separators.
 
 ## Install
 
