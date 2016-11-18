@@ -2,7 +2,7 @@
   "delimiter_mapping": {
   	"*.csv": ",",
   	"*.psv": "|",
-  	"*.tsv": "\t",
+  	"*.tsv": "\t"
   },
   "delimiter": ",",
   "auto_quote": true
