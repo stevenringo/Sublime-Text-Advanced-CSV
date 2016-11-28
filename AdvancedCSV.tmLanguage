@@ -5,6 +5,7 @@
 	<key>fileTypes</key>
 	<array>
 		<string>csv</string>
+		<string>tsv</string>
 	</array>
 	<key>name</key>
 	<string>Advanced CSV</string>
