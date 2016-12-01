@@ -1,7 +1,7 @@
 # [PackageDev] target_format: plist, ext: tmLanguage
 ---
 name: Advanced CSV
-fileTypes: [csv]
+fileTypes: [csv, tsv]
 scopeName: text.advanced_csv
 uuid: 7ce133ea-e34b-47d9-a03c-341293337c88
 
