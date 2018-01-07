@@ -565,7 +565,8 @@ class CsvSortByColDescCommand(sublime_plugin.TextCommand):
     def on_select_header_done(self, picked):
         if picked < 0:
             return
-        use_header = picked == 0
+#        use_header = picked == 0
+        use_header = False
 
         column_index = self.matrix.GetColumnIndexFromCursor(self.view)
         self.matrix.SortByColumn(column_index, SortDirection.Descending, use_header)
